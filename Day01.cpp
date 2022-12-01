@@ -39,8 +39,7 @@ typename Day01::parse_result_t Day01::parse(FILE *f) const noexcept {
     }
   }
   munmap(addr, static_cast<sz>(len));
-
-  std::sort(std::begin(elves), std::end(elves));
+  std::nth_element(std::begin(elves), std::end(elves) - 3, std::end(elves));
   return elves;
 }
 
@@ -51,9 +50,9 @@ Day01::solve(const_bool<Part2>, parse_result_t const &data,
              [[maybe_unused]] std::optional<part1_result_t> part1_answer)
     const noexcept {
   if constexpr (Part2) {
-    return std::accumulate(std::rbegin(data), std::rbegin(data) + 3, 0);
+    return std::accumulate(std::end(data) - 3, std::end(data), 0);
   } else {
-    return data.back();
+    return *std::max_element(std::end(data) - 3, std::end(data));
   }
 }
 
