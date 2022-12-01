@@ -16,5 +16,8 @@ template <u64 Value> using const_u64 = std::integral_constant<u64, Value>;
 template <sz Value> using const_sz = std::integral_constant<sz, Value>;
 template <bool Value> using const_bool = std::integral_constant<bool, Value>;
 
-constexpr inline const_bool<true> true_v {};
-constexpr inline const_bool<false> false_v {};
+using true_type = const_bool<true>;
+using false_type = const_bool<false>;
+
+constexpr inline true_type true_v {};
+constexpr inline false_type false_v {};
