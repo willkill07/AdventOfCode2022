@@ -21,8 +21,11 @@ template <bool Value> using const_bool = std::integral_constant<bool, Value>;
 using true_type = const_bool<true>;
 using false_type = const_bool<false>;
 
-constexpr inline true_type true_v {};
-constexpr inline false_type false_v {};
+constexpr inline true_type true_v{};
+constexpr inline false_type false_v{};
 
 constexpr sz const report_size = 7;
 using report_line = std::array<std::string, report_size>;
+
+constexpr const sz implemented_days = 2;
+using report_data = std::array<report_line, implemented_days>;

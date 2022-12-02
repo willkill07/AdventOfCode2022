@@ -5,6 +5,5 @@
 #include "Options.hpp"
 #include "Timing.hpp"
 
-void print_table(run_options const &options,
-                 std::vector<report_line> const &entries,
+void print_table(run_options const &options, report_data const &entries,
                  timing_data const &summary);

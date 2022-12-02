@@ -14,11 +14,9 @@ struct timing_data {
   double part1{0.0};
   double part2{0.0};
 
-  inline double total() const noexcept {
-    return parsing + part1 + part2;
-  }
+  inline double total() const noexcept { return parsing + part1 + part2; }
 
-  inline timing_data& operator+=(timing_data const& other) noexcept {
+  inline timing_data &operator+=(timing_data const &other) noexcept {
     parsing += other.parsing;
     part1 += other.part1;
     part2 += other.part2;

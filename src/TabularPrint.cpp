@@ -1,6 +1,5 @@
 #include "TabularPrint.hpp"
 
-
 #include <array>
 #include <cstdio>
 #include <functional>
@@ -58,7 +57,7 @@ void print_data(std::array<sz, Width> const &widths,
 template <typename T, typename U, size_t Len>
 std::array<sz, report_size>
 calculate_widths(std::array<T, report_size> const &header_names,
-                 std::vector<report_line> const &entries,
+                 report_data const &entries,
                  std::array<U, Len> const &summary_data,
                  std::array<bool, report_size> const &mask) {
 
@@ -94,8 +93,7 @@ calculate_widths(std::array<T, report_size> const &header_names,
   return max;
 }
 
-void print_table(run_options const &options,
-                 std::vector<report_line> const &entries,
+void print_table(run_options const &options, report_data const &entries,
                  timing_data const &summary) {
 
   using std::literals::string_literals::operator""s;

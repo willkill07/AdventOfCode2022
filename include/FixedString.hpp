@@ -8,8 +8,8 @@
 template <size_t N> struct fixed_string {
 
   char value[N];
-  sz   printable_size{0};
-  sz   size{N - 1};
+  sz printable_size{0};
+  sz size{N - 1};
 
   inline constexpr fixed_string(const char (&str)[N]) {
     std::copy_n(str, N, value);
@@ -33,7 +33,8 @@ template <size_t N> struct fixed_string {
 
 private:
   inline constexpr sz length(sz offset) const noexcept {
-    if (unsigned char const lb = static_cast<unsigned char>(value[offset]); (lb & 0x80) == 0) { // ascii
+    if (unsigned char const lb = static_cast<unsigned char>(value[offset]);
+        (lb & 0x80) == 0) { // ascii
       return 1;
     } else if ((lb & 0xE0) == 0xC0) { // 110x xxxx
       return 2;

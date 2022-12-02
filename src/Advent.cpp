@@ -12,13 +12,14 @@
 #include "Options.hpp"
 #include "TabularPrint.hpp"
 #include "Timing.hpp"
+#include "Types.hpp"
 
-template <sz DayNum>
-timing_data run_one(std::vector<report_line> &data,
-                    run_options const &options) {
-  using CurrentDay = std::tuple_element_t<DayNum, all_days>;
+template <sz DayIdx>
+timing_data run_one(report_data &data, run_options const &options) {
+  using CurrentDay = std::tuple_element_t<DayIdx, all_days>;
 
-  file_backed_buffer buffer{fmt::format("input/day{:02}.txt", DayNum)};
+  file_backed_buffer buffer{
+      fmt::format("input/day{:02}.txt", CurrentDay::number)};
   if (not buffer) {
     return {};
   }
@@ -43,19 +44,32 @@ timing_data run_one(std::vector<report_line> &data,
                          .part1 = time_in_us(t1, t2),
                          .part2 = time_in_us(t2, t3)};
 
-  data.push_back(
-      report_line{fmt::format("Day {:02}", DayNum),
-                  options.format(part1_answer), options.format(part2_answer),
-                  options.format(curr.parsing), options.format(curr.part1),
-                  options.format(curr.part2), options.format(curr.total())});
+  data[DayIdx] = report_line{fmt::format("Day {:02}", CurrentDay::number),
+                             options.format(part1_answer),
+                             options.format(part2_answer),
+                             options.format(curr.parsing),
+                             options.format(curr.part1),
+                             options.format(curr.part2),
+                             options.format(curr.total())};
 
   return curr;
 }
 
+std::tuple<timing_data, report_data> run(run_options const &options) noexcept {
+  report_data entries;
+  timing_data summary;
+  auto const do_run = [&]<sz CurrDay>(const_sz<CurrDay>) {
+    summary += run_one<CurrDay>(entries, options);
+  };
+  [&]<sz... Days>(std::index_sequence<Days...>) {
+    (do_run(const_sz<Days>{}), ...);
+  }
+  (std::make_index_sequence<implemented_days>{});
+  return std::tuple{summary, entries};
+}
+
 int main(int argc, char **argv) {
   run_options options;
-  timing_data summary;
-  std::vector<report_line> entries;
   bool help{false}, error{false};
 
   for (int c; (c = getopt(argc, argv, "p:d:th")) != -1;) {
@@ -104,10 +118,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  [&]<sz... Days>(std::index_sequence<Days...>) {
-    summary = (run_one<Days + 1>(entries, options) += ...);
-  }
-  (std::make_index_sequence<implemented_days>{});
+  auto [summary, entries] = run(options);
 
   print_table(options, entries, summary);
 }

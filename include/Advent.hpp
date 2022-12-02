@@ -4,7 +4,6 @@
 #include <type_traits>
 
 #include "Day01.hpp"
+#include "Day02.hpp"
 
-using all_days = std::tuple<void, Day01>;
-
-constexpr const sz implemented_days = std::tuple_size_v<all_days> - 1;
+using all_days = std::tuple<Day01, Day02>;
