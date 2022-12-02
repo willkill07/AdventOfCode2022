@@ -18,7 +18,11 @@ using FormatFn = fmt::detail::styled_arg<std::remove_cvref_t<T>> (*)(T const &) 
 template <fmt::emphasis... Emphs>
 fmt::detail::styled_arg<std::string>
 print_plain(std::string const &v) noexcept {
-  return fmt::styled(v, (fmt::text_style{} | ... | fmt::text_style{Emphs}));
+  if (isatty(STDOUT_FILENO)) {
+    return fmt::styled(v, (fmt::text_style{} | ... | fmt::text_style{Emphs}));
+  } else {
+    return fmt::styled(v, fmt::text_style{});
+  }
 }
 
 template <fmt::color Color, fmt::emphasis... Emphs>
@@ -27,7 +31,7 @@ print(std::string const &v) noexcept {
   if (isatty(STDOUT_FILENO)) {
     return fmt::styled(v, (fmt::fg(Color) | ... | fmt::text_style{Emphs}));
   } else {
-    return print_plain(v);
+    return fmt::styled(v, fmt::text_style{});
   }
 }
 
@@ -65,7 +69,7 @@ print_edge(std::array<sz, Width> const &widths, std::array<bool, Width> const &m
         [&] {
           if (masks[I] and widths[I] > 0) {
             fmt::print("{}", String[2 * I]);
-            auto const fmt_str = fmt::format("{{:{}^{}}}", String[2 * I + 1], widths[I]);
+            auto const fmt_str = fmt::format("{{:{}^{}}}", String[2 * I + 1], widths[I] + 2);
             fmt::vprint(fmt_str, fmt::make_format_args(""));
           }
         }(),
@@ -81,6 +85,7 @@ void
 print_data(std::array<sz, Width> const &widths,
            std::array<T, Data> const &data,
            std::array<bool, Mask> const &masks,
+           std::array<char, Mask> const &align,
            std::array<FormatFn<std::string>, Width> const &stylizers) {
   static_assert(Data == Width, "data array does not match width array");
   static_assert(Mask == Width, "mask array does not match width array");
@@ -89,7 +94,7 @@ print_data(std::array<sz, Width> const &widths,
         [&] {
           if (masks[I] and widths[I] > 0) {
             fmt::print("{}", String[2 * I]);
-            auto const fmt_str = fmt::format("{{:{}^{}}}", String[2 * I + 1], widths[I]);
+            auto const fmt_str = fmt::format("{0}{{:{0}{2}{1}}}{0}", String[2 * I + 1], widths[I], align[I]);
             auto const str = fmt::vformat(fmt_str, fmt::make_format_args(data[I]));
             fmt::print("{}", stylizers[I](str));
           }
@@ -131,9 +136,7 @@ calculate_widths(std::array<T, report_size> const &header_names,
 
   // correct for padding/mask
   for (sz idx{0}; idx < report_size; ++idx) {
-    if (mask[idx]) {
-      max[idx] += 2;
-    } else {
+    if (not mask[idx]) {
       max[idx] = 0;
     }
   }
@@ -166,7 +169,7 @@ print_table(run_options const &opts, report_data const &entries, timing_data con
 
   auto width = [&](auto... inds) -> sz {
     auto const sum = (max_widths[static_cast<sz>(inds)] + ...);
-    auto const count = (content_mask[static_cast<sz>(inds)] + ...);
+    auto const count = ((2 + content_mask[static_cast<sz>(inds)]) + ...) - 2;
     if (count > 0) {
       return sum + static_cast<sz>(count - 1);
     } else {
@@ -178,20 +181,25 @@ print_table(run_options const &opts, report_data const &entries, timing_data con
 
   std::array const summary_widths{width(0, 1, 2), width(3), width(4), width(5), width(6)};
 
+  std::array const group_align{'^', '^', '^'};
+  std::array const header_align{'^', '^', '^', '^', '^', '^', '^'};
+  std::array const data_align{'^', '<', '<', '>', '>', '>', '>'};
+  std::array const summary_align{'^', '>', '>', '>', '>'};
+
   print_edge<"  ╭─┬─╮">(header_widths, header_mask);
-  print_data<"  │ │ │">(header_widths, group_names, header_mask, colors::group);
+  print_data<"  │ │ │">(header_widths, group_names, header_mask, group_align, colors::group);
   print_edge<"╭─┼─┬─┼─┬─┬─┬─┤">(max_widths, content_mask);
-  print_data<"│ │ │ │ │ │ │ │">(max_widths, header_names, content_mask, colors::header);
+  print_data<"│ │ │ │ │ │ │ │">(max_widths, header_names, content_mask, header_align, colors::header);
   print_edge<"├─┼─┼─┼─┼─┼─┼─┤">(max_widths, content_mask);
   if (opts.single.has_value()) {
-    print_data<"│ │ │ │ │ │ │ │">(max_widths, entries[opts.single.value()], content_mask, colors::content);
+    print_data<"│ │ │ │ │ │ │ │">(max_widths, entries[opts.single.value()], content_mask, data_align, colors::content);
   } else {
     for (auto const &entry : entries) {
-      print_data<"│ │ │ │ │ │ │ │">(max_widths, entry, content_mask, colors::content);
+      print_data<"│ │ │ │ │ │ │ │">(max_widths, entry, content_mask, data_align, colors::content);
     }
     if (opts.timing) {
       print_edge<"├─┴─┴─┼─┼─┼─┼─┤">(max_widths, content_mask);
-      print_data<"│ │ │ │ │ │">(summary_widths, summary_data, summary_mask, colors::summary);
+      print_data<"│ │ │ │ │ │">(summary_widths, summary_data, summary_mask, summary_align, colors::summary);
       print_edge<"╰─┴─┴─┴─┴─╯">(summary_widths, summary_mask);
       return;
     }
