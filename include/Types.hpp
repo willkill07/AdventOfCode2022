@@ -1,6 +1,8 @@
 #pragma once
 
+#include <array>
 #include <cstdint>
+#include <string>
 #include <type_traits>
 
 using i32 = std::int32_t;
@@ -21,3 +23,6 @@ using false_type = const_bool<false>;
 
 constexpr inline true_type true_v {};
 constexpr inline false_type false_v {};
+
+constexpr sz const report_size = 7;
+using report_line = std::array<std::string, report_size>;

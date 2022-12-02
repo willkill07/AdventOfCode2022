@@ -2,8 +2,9 @@ cmake_minimum_required(VERSION 3.20)
 project(AdventOfCode2021 CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
+set(CMAKE_BUILD_TYPE Release)
 
-set(common_flags -Wall -Wextra -Wpedantic -Wconversion -Wuninitialized -O3 -march=native)
+set(common_flags -Wall -Wextra -Wpedantic -Wconversion -Wuninitialized -march=native)
 
 include(FetchContent)
 
