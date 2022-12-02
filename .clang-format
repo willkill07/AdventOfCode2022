@@ -1,0 +1,15 @@
+---
+Language:        Cpp
+BasedOnStyle:  LLVM
+ColumnLimit:     120
+AllowShortBlocksOnASingleLine : Never
+AllowShortFunctionsOnASingleLine : None
+AllowShortLambdasOnASingleLine : None
+PackConstructorInitializers : Never
+AllowAllArgumentsOnNextLine : False
+BinPackParameters : False
+BinPackArguments : False
+SeparateDefinitionBlocks: Always
+SpaceAfterTemplateKeyword: True
+AlwaysBreakTemplateDeclarations: Yes
+AlwaysBreakAfterReturnType : TopLevel

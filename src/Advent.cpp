@@ -1,8 +1,9 @@
 #include <cstdlib>
 #include <tuple>
-#include <unistd.h>
 #include <utility>
 #include <vector>
+
+#include <unistd.h>
 
 #include <fmt/core.h>
 
@@ -15,15 +16,15 @@
 #include "Types.hpp"
 
 template <sz DayIdx>
-timing_data run_one(report_data &data, run_options const &options) {
+timing_data
+run_one(report_data &data, run_options const &options) {
   using CurrentDay = std::tuple_element_t<DayIdx, all_days>;
 
   if (options.single.has_value() && options.single.value() != DayIdx) {
     return {};
   }
 
-  file_backed_buffer buffer{
-      fmt::format("input/day{:02}.txt", CurrentDay::number)};
+  file_backed_buffer buffer{fmt::format("input/day{:02}.txt", CurrentDay::number)};
   if (not buffer) {
     return {};
   }
@@ -33,20 +34,18 @@ timing_data run_one(report_data &data, run_options const &options) {
   time_point t0 = clock_type::now();
   auto const parsed = day.parse(buffer.get_span());
   time_point t1 = clock_type::now();
-  auto const part1_answer = day.solve(false_v, parsed);
+  auto const part1_answer = day.template solve<false>(parsed);
   time_point t2 = clock_type::now();
   auto const part2_answer = [&] {
     if (options.part2) {
-      return day.solve(true_v, parsed, part1_answer);
+      return day.template solve<true>(parsed, part1_answer);
     } else {
       return typename CurrentDay::part2_result_t{};
     }
   }();
   time_point t3 = clock_type::now();
 
-  timing_data const curr{.parsing = time_in_us(t0, t1),
-                         .part1 = time_in_us(t1, t2),
-                         .part2 = time_in_us(t2, t3)};
+  timing_data const curr{.parsing = time_in_us(t0, t1), .part1 = time_in_us(t1, t2), .part2 = time_in_us(t2, t3)};
 
   data[DayIdx] = report_line{fmt::format("Day {:02}", CurrentDay::number),
                              options.format(part1_answer),
@@ -59,7 +58,8 @@ timing_data run_one(report_data &data, run_options const &options) {
   return curr;
 }
 
-std::tuple<timing_data, report_data> run(run_options const &options) noexcept {
+std::tuple<timing_data, report_data>
+run(run_options const &options) noexcept {
   report_data entries;
   timing_data summary;
   auto const do_run = [&]<sz CurrDay>(const_sz<CurrDay>) {
@@ -72,7 +72,8 @@ std::tuple<timing_data, report_data> run(run_options const &options) noexcept {
   return std::tuple{summary, entries};
 }
 
-int main(int argc, char **argv) {
+int
+main(int argc, char **argv) {
   run_options options{};
   bool help{false};
   bool error{false};
@@ -118,8 +119,7 @@ int main(int argc, char **argv) {
   if (help) {
     fmt::print("Advent of Code 2022 (in Modern C++)\n");
     fmt::print("Created by William Killian (willkill07)\n\n");
-    fmt::print("Usage: {} [-h | [-1] [-t] [-d <day_num>] [-p <prec>]] \n\n",
-               argv[0]);
+    fmt::print("Usage: {} [-h | [-1] [-t] [-d <day_num>] [-p <prec>]] \n\n", argv[0]);
     fmt::print("    -h           show help\n");
     fmt::print("    -d <day_num> run single day\n");
     fmt::print("    -1           only run part 1\n");

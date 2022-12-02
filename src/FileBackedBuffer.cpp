@@ -15,21 +15,21 @@ file_backed_buffer::file_backed_buffer(std::string const &filename) noexcept
           return static_cast<sz>(st.st_size);
         }
       }()),
-      file_desc(
-          [&]() noexcept -> int { return open(filename.c_str(), O_RDONLY); }()),
+      file_desc([&]() noexcept -> int {
+        return open(filename.c_str(), O_RDONLY);
+      }()),
       buffer_address([&]() noexcept -> char const * {
         if (file_desc < 0) {
           return nullptr;
         } else {
-          return reinterpret_cast<char const *>(
-              mmap(NULL, buffer_length, PROT_READ, MAP_PRIVATE, file_desc, 0));
+          return reinterpret_cast<char const *>(mmap(NULL, buffer_length, PROT_READ, MAP_PRIVATE, file_desc, 0));
         }
-      }()) {}
+      }()) {
+}
 
 file_backed_buffer::~file_backed_buffer() noexcept {
   if (buffer_address != nullptr) {
-    munmap(const_cast<void *>(reinterpret_cast<void const *>(buffer_address)),
-           buffer_length);
+    munmap(const_cast<void *>(reinterpret_cast<void const *>(buffer_address)), buffer_length);
   }
   if (file_desc >= 0) {
     (void)close(file_desc);
@@ -40,6 +40,7 @@ file_backed_buffer::operator bool() const noexcept {
   return (buffer_address != nullptr) and not(file_desc < 0);
 }
 
-std::span<char const> file_backed_buffer::get_span() const noexcept {
+std::span<char const>
+file_backed_buffer::get_span() const noexcept {
   return {buffer_address, buffer_length};
 }

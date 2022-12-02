@@ -11,8 +11,7 @@ class parse_state {
   bool saw_space{false};
 
 public:
-  void advance(char curr,
-               std::invocable<int> auto &&on_value_callback) noexcept {
+  void advance(char curr, std::invocable<int> auto &&on_value_callback) noexcept {
     bool const is_digit{'0' <= curr and curr <= '9'};
     if (is_digit) [[likely]] {
       curr_calories = (10 * curr_calories) + (curr - '0');
@@ -44,6 +43,10 @@ PARSE_IMPL(Day01, buffer) {
   return top3;
 }
 
-PART1_IMPL(Day01, data) { return data[2]; }
+PART1_IMPL(Day01, data) {
+  return data[2];
+}
 
-PART2_IMPL(Day01, data, part1_answer) { return data[0] + data[1] + data[2]; }
+PART2_IMPL(Day01, data, part1_answer) {
+  return data[0] + data[1] + data[2];
+}

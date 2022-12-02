@@ -5,7 +5,8 @@
 
 #include "Types.hpp"
 
-template <size_t N> struct fixed_string {
+template <size_t N>
+struct fixed_string {
 
   char value[N];
   sz printable_size{0};
@@ -33,8 +34,7 @@ template <size_t N> struct fixed_string {
 
 private:
   inline constexpr sz length(sz offset) const noexcept {
-    if (unsigned char const lb = static_cast<unsigned char>(value[offset]);
-        (lb & 0x80) == 0) { // ascii
+    if (unsigned char const lb = static_cast<unsigned char>(value[offset]); (lb & 0x80) == 0) { // ascii
       return 1;
     } else if ((lb & 0xE0) == 0xC0) { // 110x xxxx
       return 2;
