@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <optional>
 #include <string>
 
 #include <fmt/core.h>
@@ -11,6 +12,7 @@ struct run_options {
   u32 precision{2};
   bool timing{false};
   bool part2{true};
+  std::optional<u32> single{std::nullopt};
 
   inline std::string format(std::integral auto value) const noexcept {
     return fmt::format("{0}", value);

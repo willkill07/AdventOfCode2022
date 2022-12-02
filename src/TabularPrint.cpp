@@ -140,14 +140,18 @@ void print_table(run_options const &options, report_data const &entries,
   print_edge<"╭─┼─┬─┼─┬─┬─┬─┤">(max_widths, content_mask);
   print_data<"│ │ │ │ │ │ │ │">(max_widths, header_names, content_mask);
   print_edge<"├─┼─┼─┼─┼─┼─┼─┤">(max_widths, content_mask);
-  for (auto const &entry : entries) {
-    print_data<"│ │ │ │ │ │ │ │">(max_widths, entry, content_mask);
-  }
-  if (options.timing) {
-    print_edge<"├─┴─┴─┼─┼─┼─┼─┤">(max_widths, content_mask);
-    print_data<"│ │ │ │ │ │">(summary_widths, summary_data, summary_mask);
-    print_edge<"╰─┴─┴─┴─┴─╯">(summary_widths, summary_mask);
+  if (options.single.has_value()) {
+    print_data<"│ │ │ │ │ │ │ │">(max_widths, entries[options.single.value()], content_mask);
   } else {
-    print_edge<"╰─┴─┴─┴─┴─┴─┴─╯">(max_widths, content_mask);
+    for (auto const &entry : entries) {
+      print_data<"│ │ │ │ │ │ │ │">(max_widths, entry, content_mask);
+    }
+    if (options.timing) {
+      print_edge<"├─┴─┴─┼─┼─┼─┼─┤">(max_widths, content_mask);
+      print_data<"│ │ │ │ │ │">(summary_widths, summary_data, summary_mask);
+      print_edge<"╰─┴─┴─┴─┴─╯">(summary_widths, summary_mask);
+      return;
+    }
   }
+  print_edge<"╰─┴─┴─┴─┴─┴─┴─╯">(max_widths, content_mask);
 }

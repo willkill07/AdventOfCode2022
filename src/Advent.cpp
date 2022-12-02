@@ -18,6 +18,10 @@ template <sz DayIdx>
 timing_data run_one(report_data &data, run_options const &options) {
   using CurrentDay = std::tuple_element_t<DayIdx, all_days>;
 
+  if (options.single.has_value() && options.single.value() != DayIdx) {
+    return {};
+  }
+
   file_backed_buffer buffer{
       fmt::format("input/day{:02}.txt", CurrentDay::number)};
   if (not buffer) {
@@ -69,53 +73,62 @@ std::tuple<timing_data, report_data> run(run_options const &options) noexcept {
 }
 
 int main(int argc, char **argv) {
-  run_options options;
-  bool help{false}, error{false};
+  run_options options{};
+  bool help{false};
+  bool error{false};
 
-  for (int c; (c = getopt(argc, argv, "p:d:th")) != -1;) {
+  for (int c; (c = getopt(argc, argv, "h1td:p:")) != -1;) {
     switch (c) {
+    case 'd': {
+      u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
+      if (value == 0 || value > implemented_days) {
+        fprintf(stderr, "Option -%c requires day to be implemented.\n", optopt);
+        error = true;
+      } else {
+        options.single = value - 1;
+      }
+      break;
+    }
     case 'p':
       options.precision = static_cast<u32>(atoi(optarg));
       break;
-    case 'd':
-      options.part2 = (atoi(optarg) == 2);
+    case '1':
+      options.part2 = false;
       break;
     case 't':
       options.timing = true;
       break;
+    case '?':
+      if (optopt == 'p' || optopt == 'd') {
+        fprintf(stderr, "Option -%c requires an argument.\n", c);
+      } else if (isprint(optopt)) {
+        fprintf(stderr, "Unknown option `-%c'.\n", c);
+      } else {
+        fprintf(stderr, "Unknown option character `\\x%x'.\n", c);
+      }
+      [[fallthrough]];
+    default:
+      error = true;
+      [[fallthrough]];
     case 'h':
       help = true;
-      break;
-    case '?':
-      help = true;
-      if (optopt == 'p' || optopt == 'd') {
-        fprintf(stderr, "Option -%c requires an argument.\n", optopt);
-      } else if (isprint(optopt)) {
-        fprintf(stderr, "Unknown option `-%c'.\n", optopt);
-      } else {
-        fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
-      }
-      error = true;
-      break;
-    default:
-      help = true;
-      error = true;
     }
   }
 
   if (help) {
     fmt::print("Advent of Code 2022 (in Modern C++)\n");
     fmt::print("Created by William Killian (willkill07)\n\n");
-    fmt::print("Usage: {} [-d [1|2]] [-t] [-p P] [-h]\n\n", argv[0]);
-    fmt::print("    -d [1|2]     parts to run (defaults to 2)\n");
-    fmt::print("    -t           show timing (disabled by default)\n");
-    fmt::print("    -p P         precision of timing output (default 2)\n");
+    fmt::print("Usage: {} [-h | [-1] [-t] [-d <day_num>] [-p <prec>]] \n\n",
+               argv[0]);
     fmt::print("    -h           show help\n");
-    if (error) {
-      return EXIT_FAILURE;
-    } else {
-      return EXIT_SUCCESS;
-    }
+    fmt::print("    -d <day_num> run single day\n");
+    fmt::print("    -1           only run part 1\n");
+    fmt::print("    -t           enable timing\n");
+    fmt::print("    -p <prec=2>  precision of timing output\n");
+    return EXIT_SUCCESS;
+  }
+  if (error) {
+    return EXIT_FAILURE;
   }
 
   auto [summary, entries] = run(options);
