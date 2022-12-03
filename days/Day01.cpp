@@ -1,6 +1,4 @@
 #include <concepts>
-#include <optional>
-#include <span>
 #include <utility>
 
 #include "Day01.hpp"
@@ -11,7 +9,8 @@ class parse_state {
   bool saw_space{false};
 
 public:
-  void advance(char curr, std::invocable<int> auto &&on_value_callback) noexcept {
+  template <std::invocable<int> Fn>
+  [[gnu::always_inline]] void advance(char curr, Fn &&on_value_callback) noexcept {
     bool const is_digit{'0' <= curr and curr <= '9'};
     if (is_digit) [[likely]] {
       curr_calories = (10 * curr_calories) + (curr - '0');
@@ -28,7 +27,7 @@ PARSE_IMPL(Day01, buffer) {
   parse_state state;
   std::array<int, 3> top3{0, 0, 0};
   for (char const curr : buffer) {
-    state.advance(curr, [&](int value) {
+    state.advance(curr, [&] [[gnu::always_inline]] (int value) {
       if (value > top3[0]) {
         std::swap(value, top3[0]);
       }

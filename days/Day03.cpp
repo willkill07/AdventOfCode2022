@@ -13,7 +13,7 @@ score(char c) noexcept {
 }
 
 template <std::random_access_iterator Iter1, std::random_access_iterator Iter2>
-auto
+[[gnu::always_inline, nodiscard]] auto
 unique_occuring(Iter1 a0, Iter1 a1, Iter2 b0, Iter2 b1) noexcept
   requires std::same_as<std::iter_value_t<Iter1>, std::iter_value_t<Iter2>>
 {
@@ -33,7 +33,7 @@ unique_occuring(Iter1 a0, Iter1 a1, Iter2 b0, Iter2 b1) noexcept
 }
 
 template <std::random_access_iterator Iter1, std::random_access_iterator Iter2, std::random_access_iterator Iter3>
-auto
+[[gnu::always_inline, nodiscard]] auto
 unique_occuring(Iter1 a0, Iter1 a1, Iter2 b0, Iter2 b1, Iter3 c0, Iter3 c1) noexcept
   requires std::same_as<std::iter_value_t<Iter1>, std::iter_value_t<Iter2>> and
            std::same_as<std::iter_value_t<Iter1>, std::iter_value_t<Iter3>>
@@ -60,7 +60,8 @@ unique_occuring(Iter1 a0, Iter1 a1, Iter2 b0, Iter2 b1, Iter3 c0, Iter3 c1) noex
 }
 
 PARSE_IMPL(Day03, buffer) {
-  std::vector<std::string_view> result;
+  std::vector<std::string_view> result(300);
+  result.clear();
   std::string_view view{buffer.data(), buffer.size()};
   for (sz off{0}; off < std::size(buffer); ) {
     auto const length = view.find_first_of('\n', off) - off;
