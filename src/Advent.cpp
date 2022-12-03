@@ -78,7 +78,7 @@ main(int argc, char **argv) {
   bool help{false};
   bool error{false};
 
-  for (int c; (c = getopt(argc, argv, "h1td:p:")) != -1;) {
+  for (int c; (c = getopt(argc, argv, "h1Td:p:")) != -1;) {
     switch (c) {
     case 'd': {
       u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
@@ -96,8 +96,8 @@ main(int argc, char **argv) {
     case '1':
       options.part2 = false;
       break;
-    case 't':
-      options.timing = true;
+    case 'T':
+      options.timing = false;
       break;
     case '?':
       if (optopt == 'p' || optopt == 'd') {
@@ -119,11 +119,11 @@ main(int argc, char **argv) {
   if (help) {
     fmt::print("Advent of Code 2022 (in Modern C++)\n");
     fmt::print("Created by William Killian (willkill07)\n\n");
-    fmt::print("Usage: {} [-h | [-1] [-t] [-d <day_num>] [-p <prec>]] \n\n", argv[0]);
+    fmt::print("Usage: {} [-h | [-1] [-T] [-d <day_num>] [-p <prec>]] \n\n", argv[0]);
     fmt::print("    -h           show help\n");
     fmt::print("    -d <day_num> run single day\n");
     fmt::print("    -1           only run part 1\n");
-    fmt::print("    -t           enable timing\n");
+    fmt::print("    -T           disable timing\n");
     fmt::print("    -p <prec=2>  precision of timing output\n");
     return EXIT_SUCCESS;
   }
