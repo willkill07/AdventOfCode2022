@@ -25,4 +25,12 @@ struct timing_data {
     part2 += other.part2;
     return *this;
   }
+
+  inline timing_data& operator/=(unsigned int const reps) noexcept {
+    parsing /= reps;
+    part1 /= reps;
+    part2 /= reps;
+    return *this;
+  }
+  
 };

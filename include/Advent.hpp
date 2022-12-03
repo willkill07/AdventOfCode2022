@@ -5,5 +5,6 @@
 
 #include "Day01.hpp"
 #include "Day02.hpp"
+#include "Day03.hpp"
 
-using all_days = std::tuple<Day01, Day02>;
+using all_days = std::tuple<Day01, Day02, Day03>;

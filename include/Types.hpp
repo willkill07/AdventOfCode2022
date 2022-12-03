@@ -37,5 +37,5 @@ constexpr inline false_type false_v{};
 constexpr sz const report_size = 7;
 using report_line = std::array<std::string, report_size>;
 
-constexpr const sz implemented_days = 2;
+constexpr const sz implemented_days = 3;
 using report_data = std::array<report_line, implemented_days>;

@@ -33,11 +33,20 @@ run_one(report_data &data, run_options const &options) {
 
   time_point t0 = clock_type::now();
   auto const parsed = day.parse(buffer.get_span());
+  for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
+    (void)day.parse(buffer.get_span());
+  }
   time_point t1 = clock_type::now();
   auto const part1_answer = day.template solve<false>(parsed);
+  for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
+    (void)day.template solve<false>(parsed);
+  }
   time_point t2 = clock_type::now();
   auto const part2_answer = [&] {
     if (options.part2) {
+      for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
+        (void)day.template solve<true>(parsed);
+      }
       return day.template solve<true>(parsed, part1_answer);
     } else {
       return typename CurrentDay::part2_result_t{};
@@ -45,7 +54,8 @@ run_one(report_data &data, run_options const &options) {
   }();
   time_point t3 = clock_type::now();
 
-  timing_data const curr{.parsing = time_in_us(t0, t1), .part1 = time_in_us(t1, t2), .part2 = time_in_us(t2, t3)};
+  timing_data curr{.parsing = time_in_us(t0, t1), .part1 = time_in_us(t1, t2), .part2 = time_in_us(t2, t3)};
+  curr /= options.benchmark.value_or(1);
 
   data[DayIdx] = report_line{fmt::format("Day {:02}", CurrentDay::number),
                              options.format(part1_answer),
@@ -78,7 +88,7 @@ main(int argc, char **argv) {
   bool help{false};
   bool error{false};
 
-  for (int c; (c = getopt(argc, argv, "h1Td:p:")) != -1;) {
+  for (int c; (c = getopt(argc, argv, "h1Td:p:b:")) != -1;) {
     switch (c) {
     case 'd': {
       u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
@@ -99,6 +109,16 @@ main(int argc, char **argv) {
     case 'T':
       options.timing = false;
       break;
+    case 'b': {
+      u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
+      if (value == 0) {
+        fprintf(stderr, "Option -%c requires value to be positive and non-zero.\n", optopt);
+        error = true;
+      } else {
+        options.benchmark = value;
+      }
+      break;
+    }
     case '?':
       if (optopt == 'p' || optopt == 'd') {
         fprintf(stderr, "Option -%c requires an argument.\n", c);
@@ -119,12 +139,13 @@ main(int argc, char **argv) {
   if (help) {
     fmt::print("Advent of Code 2022 (in Modern C++)\n");
     fmt::print("Created by William Killian (willkill07)\n\n");
-    fmt::print("Usage: {} [-h | [-1] [-T] [-d <day_num>] [-p <prec>]] \n\n", argv[0]);
+    fmt::print("Usage: {} [-h | [-1] [-T] [-d <day_num>] [-p <prec>] [-b <times>]] \n\n", argv[0]);
     fmt::print("    -h           show help\n");
     fmt::print("    -d <day_num> run single day\n");
     fmt::print("    -1           only run part 1\n");
     fmt::print("    -T           disable timing\n");
     fmt::print("    -p <prec=2>  precision of timing output\n");
+    fmt::print("    -b <times>   benchmark run (repetition amount)\n");
     return EXIT_SUCCESS;
   }
   if (error) {

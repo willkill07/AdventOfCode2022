@@ -13,6 +13,7 @@ struct run_options {
   bool timing{true};
   bool part2{true};
   std::optional<u32> single{std::nullopt};
+  std::optional<u32> benchmark{std::nullopt};
 
   inline std::string format(std::integral auto value) const noexcept {
     return fmt::format("{0}", value);
