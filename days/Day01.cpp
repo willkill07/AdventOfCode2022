@@ -1,49 +1,57 @@
 #include <concepts>
+#include <numeric>
+#include <type_traits>
 #include <utility>
 
 #include "Day01.hpp"
 
-class parse_state {
-  int curr_calories{0};
-  int curr_sum{0};
-  bool saw_space{false};
+template <std::unsigned_integral T>
+[[gnu::always_inline]] T
+str_to(std::string_view s) noexcept {
+  return std::accumulate(std::begin(s) + 1, std::end(s), static_cast<T>(s.front() - '0'), [](T acc, char c) {
+    return T{10} * acc + T(c - '0');
+  });
+}
 
-public:
-  template <std::invocable<int> Fn>
-  [[gnu::always_inline]] void advance(char curr, Fn &&on_value_callback) noexcept {
-    bool const is_digit{'0' <= curr and curr <= '9'};
-    if (is_digit) [[likely]] {
-      curr_calories = (10 * curr_calories) + (curr - '0');
-    } else if (saw_space) [[unlikely]] {
-      on_value_callback(std::exchange(curr_sum, 0));
-    } else {
-      curr_sum += std::exchange(curr_calories, 0);
-    }
-    saw_space = not is_digit;
-  }
-};
+template <std::signed_integral T>
+[[gnu::always_inline]] T
+str_to(std::string_view s) noexcept {
+  bool const neg{s.front() == '-'};
+  T const value {static_cast<T>(str_to<std::make_unsigned_t<T>>(s.substr(static_cast<sz>(neg))))};
+  return neg ? -value : value;
+}
 
 PARSE_IMPL(Day01, buffer) {
-  parse_state state;
-  std::array<int, 3> top3{0, 0, 0};
-  for (char const curr : buffer) {
-    state.advance(curr, [&] [[gnu::always_inline]] (int value) {
-      if (value > top3[0]) {
-        std::swap(value, top3[0]);
+  u32 sum{0};
+  std::array<u32, 3> top3{0,0,0};
+  std::string_view view{buffer.data(), buffer.size()};
+  for (sz off{0}; off < std::size(view); ++off) {
+    sz const len{view.substr(off).find_first_of('\n')};
+    if (len > 0) {
+      sum += str_to<u32>(view.substr(off, len));
+      off += len;
+    } else {
+      if (sum > top3[2]) {
+        if (sum > top3[1]) {
+          top3[2] = top3[1];
+          if (sum > top3[0]) {
+            top3[1] = top3[0];
+            top3[0] = sum;
+          } else {
+            top3[1] = sum;
+          }
+        } else {
+          top3[2] = sum;
+        }
       }
-      if (value > top3[1]) {
-        std::swap(value, top3[1]);
-      }
-      if (value > top3[2]) {
-        top3[2] = value;
-      }
-    });
+      sum = 0;
+    }
   }
   return top3;
 }
 
 PART1_IMPL(Day01, data) {
-  return data[2];
+  return data[0];
 }
 
 PART2_IMPL(Day01, data, part1_answer) {
