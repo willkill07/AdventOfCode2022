@@ -3,4 +3,5 @@ target_sources(advent
   Day01.cpp
   Day02.cpp
   Day03.cpp
+  Day04.cpp
 )
