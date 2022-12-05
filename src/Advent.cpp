@@ -10,6 +10,7 @@
 #include "Advent.hpp"
 #include "FileBackedBuffer.hpp"
 #include "FixedString.hpp"
+#include "MetaUtils.hpp"
 #include "Options.hpp"
 #include "TabularPrint.hpp"
 #include "Timing.hpp"
@@ -30,22 +31,25 @@ run_one(report_data &data, run_options const &options) {
   }
 
   CurrentDay day;
-
   time_point t0 = clock_type::now();
-  auto const parsed = day.parse(buffer.get_span());
-  for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
-    (void)day.parse(buffer.get_span());
-  }
+  auto const parsed = [&] {
+    for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
+      (void)day.parse(buffer.get_span());
+    }
+    return day.parse(buffer.get_span());
+  }();
   time_point t1 = clock_type::now();
-  auto const part1_answer = day.template solve<false>(parsed);
-  for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
-    (void)day.template solve<false>(parsed);
-  }
+  auto const part1_answer = [&] {
+    for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
+      (void)day.template solve<false>(parsed);
+    }
+    return day.template solve<false>(parsed);
+  }();
   time_point t2 = clock_type::now();
   auto const part2_answer = [&] {
     if (options.part2) {
       for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
-        (void)day.template solve<true>(parsed);
+        (void)day.template solve<true>(parsed, part1_answer);
       }
       return day.template solve<true>(parsed, part1_answer);
     } else {
@@ -72,13 +76,9 @@ std::tuple<timing_data, report_data>
 run(run_options const &options) noexcept {
   report_data entries;
   timing_data summary;
-  auto const do_run = [&]<sz CurrDay>(const_sz<CurrDay>) {
-    summary += run_one<CurrDay>(entries, options);
-  };
-  [&]<sz... Days>(std::index_sequence<Days...>) {
-    (do_run(const_sz<Days>{}), ...);
-  }
-  (std::make_index_sequence<implemented_days>{});
+  static_for<implemented_days>([&]<sz Day>() {
+    summary += run_one<Day>(entries, options);
+  });
   return std::tuple{summary, entries};
 }
 

@@ -6,25 +6,25 @@
 #include "FileBackedBuffer.hpp"
 
 file_backed_buffer::file_backed_buffer(std::string const &filename) noexcept
-    : buffer_length([&]() noexcept -> sz {
+    : buffer_length([](std::string const &file) noexcept -> sz {
         struct stat st;
-        int const res{stat(filename.c_str(), &st)};
+        int const res{stat(file.c_str(), &st)};
         if (res < 0) {
           return sz{0};
         } else {
           return static_cast<sz>(st.st_size);
         }
-      }()),
-      file_desc([&]() noexcept -> int {
-        return open(filename.c_str(), O_RDONLY);
-      }()),
-      buffer_address([&]() noexcept -> char const * {
-        if (file_desc < 0) {
+      }(filename)),
+      file_desc([](std::string const &file) noexcept -> int {
+        return open(file.c_str(), O_RDONLY);
+      }(filename)),
+      buffer_address([](int fd, sz len) noexcept -> char const * {
+        if (fd < 0) {
           return nullptr;
         } else {
-          return reinterpret_cast<char const *>(mmap(NULL, buffer_length, PROT_READ, MAP_PRIVATE, file_desc, 0));
+          return reinterpret_cast<char const *>(mmap(NULL, len, PROT_READ, MAP_PRIVATE, fd, 0));
         }
-      }()) {
+      }(file_desc, buffer_length)) {
 }
 
 file_backed_buffer::~file_backed_buffer() noexcept {

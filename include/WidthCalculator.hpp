@@ -44,48 +44,54 @@ public:
   template <sz CurrLen, sz Offset>
   inline column_state get_column() noexcept {
     column_state state;
-    static_for<CurrLen>([&]<sz i> {
-      if (mask[Offset + i]) {
-        state.add(total[Offset + i]);
+    auto inner = [&]<sz i>(width_calculator<Columns> &self, column_state &col_state) {
+      if (self.mask[Offset + i]) {
+        col_state.add(self.total[Offset + i]);
       }
-    });
+    };
+    static_for<CurrLen>(inner, *this, state);
     return state;
   }
 
-  template <std::array Array, typename T>
+  template <std::array Array, typename T, std::array Offsets = exclusive_sum(Array)>
   void update(std::array<T, Array.size()> const &col_vals) noexcept
     requires std::constructible_from<std::string_view, T>
   {
     static_assert(sum(Array) == Columns, "Invalid grouping array specified");
-    constexpr auto const Offsets = exclusive_sum(Array);
-    // walk through each "size" in grouping array
-    static_for<Array.size()>([&]<sz Idx>() {
+    auto inner = []<sz I, sz Idx>(width_calculator<Columns> &self,
+                                  const_sz<Idx>,
+                                  column_state const &col,
+                                  sz const growth_amount,
+                                  sz &curr) {
+      // we are not hiding the underlying
+      if (self.mask[Offsets[Idx] + I]) {
+        self.total[Offsets[Idx] + I] += col.get_adjustment(growth_amount, curr++);
+      }
+    };
+    auto outer = []<sz Idx>(width_calculator<Columns> &self, auto const &cv, auto &&inner) {
       constexpr sz const curr_len{Array[Idx]};
-      column_state const col{get_column<curr_len, Offsets[Idx]>()};
-      sz const required{std::size(std::string_view{col_vals[Idx]})};
+      column_state const col{self.get_column<curr_len, Offsets[Idx]>()};
+      sz const required{std::size(std::string_view{cv[Idx]})};
       sz const current{col.real_width()};
       // if we need to expand
       if (current < required) {
         sz const growth_amount{required - current};
         sz curr{0};
-        static_for<curr_len>([&]<sz I>() {
-          // we are not hiding the underlying
-          if (mask[Offsets[Idx] + I]) {
-            total[Offsets[Idx] + I] += col.get_adjustment(growth_amount, curr++);
-          }
-        });
+        static_for<curr_len>(inner, self, const_sz<Idx>{}, col, growth_amount, curr);
       }
-    });
+    };
+    // walk through each "size" in grouping array
+    static_for<Array.size()>(outer, *this, col_vals, std::forward<decltype(inner)>(inner));
   }
 
-  template <std::array Array>
+  template <std::array Array, std::array Offsets = exclusive_sum(Array)>
   std::array<sz, Array.size()> get(std::array<bool, Array.size()> const &curr_mask) noexcept {
     static_assert(sum(Array) == Columns, "Invalid grouping array specified");
-    constexpr auto const Offsets = exclusive_sum(Array);
     std::array<sz, Array.size()> arr;
-    static_for<Array.size()>([&]<sz Idx>() {
-      arr[Idx] = (curr_mask[Idx] ? get_column<Array[Idx], Offsets[Idx]>().real_width() : 0);
-    });
+    auto inner = []<sz Idx>(width_calculator<Columns> &self, auto const &cm, auto &width) {
+      width[Idx] = (cm[Idx] ? self.get_column<Array[Idx], Offsets[Idx]>().real_width() : 0);
+    };
+    static_for<Array.size()>(inner, *this, curr_mask, arr);
     return arr;
   }
 };
