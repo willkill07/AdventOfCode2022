@@ -76,9 +76,9 @@ std::tuple<timing_data, report_data>
 run(run_options const &options) noexcept {
   report_data entries;
   timing_data summary;
-  static_for<implemented_days>([&]<sz Day>() {
-    summary += run_one<Day>(entries, options);
-  });
+  static_for<implemented_days>([]<sz Day>(timing_data& total, report_data& data, run_options const& opts) {
+    total += run_one<Day>(data, opts);
+  }, summary, entries, options);
   return std::tuple{summary, entries};
 }
 
