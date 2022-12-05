@@ -15,7 +15,7 @@ struct Day {
   using part1_result_t = Part1Result;
   using part2_result_t = Part2Result;
 
-  parse_result_t parse(std::span<char const> f) const noexcept;
+  parse_result_t parse(std::string_view) const noexcept;
 
   template <bool Part2>
   std::conditional_t<Part2, part2_result_t, part1_result_t>
@@ -27,7 +27,7 @@ struct Day {
 #define PARSE_IMPL(DAY, ParamBuffer)                                                                                   \
   /* Class template specialization */                                                                                  \
   template <>                                                                                                          \
-  typename DAY::parse_result_t DAY::parse(std::span<char const> ParamBuffer) const noexcept
+  typename DAY::parse_result_t DAY::parse(std::string_view ParamBuffer) const noexcept
 
 //! Macro for generating function signature for a part1 solution
 #define PART1_IMPL(DAY, ParamParseResult)                                                                              \

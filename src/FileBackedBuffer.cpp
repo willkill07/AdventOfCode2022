@@ -44,3 +44,8 @@ std::span<char const>
 file_backed_buffer::get_span() const noexcept {
   return {buffer_address, buffer_length};
 }
+
+std::string_view
+file_backed_buffer::get_string_view() const noexcept {
+  return {buffer_address, buffer_length};
+}

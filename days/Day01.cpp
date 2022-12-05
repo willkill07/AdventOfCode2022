@@ -1,10 +1,9 @@
 #include "Day01.hpp"
 #include "Parsing.hpp"
 
-PARSE_IMPL(Day01, buffer) {
+PARSE_IMPL(Day01, view) {
   u32 sum{0};
   std::array<u32, 3> top3{0,0,0};
-  std::string_view view{buffer.data(), buffer.size()};
   for (sz off{0}; off < std::size(view); ) {
     u32 val;
     sz const len = read<"\0\n">(view.substr(off), val);

@@ -34,9 +34,9 @@ run_one(report_data &data, run_options const &options) {
   time_point t0 = clock_type::now();
   auto const parsed = [&] {
     for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
-      (void)day.parse(buffer.get_span());
+      (void)day.parse(buffer.get_string_view());
     }
-    return day.parse(buffer.get_span());
+    return day.parse(buffer.get_string_view());
   }();
   time_point t1 = clock_type::now();
   auto const part1_answer = [&] {

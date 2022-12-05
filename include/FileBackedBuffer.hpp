@@ -18,4 +18,6 @@ public:
   operator bool() const noexcept;
 
   std::span<char const> get_span() const noexcept;
+
+  std::string_view get_string_view() const noexcept;
 };

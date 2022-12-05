@@ -5,8 +5,7 @@
 #include "Day05.hpp"
 #include "Parsing.hpp"
 
-PARSE_IMPL(Day05, buffer) {
-  std::string_view view{buffer.data(), buffer.size()};
+PARSE_IMPL(Day05, view) {
   // determine number of stacks by looking at line length
   sz const num_stacks{(view.find_first_of('\n') + 1) / 4};
   // create stacks
@@ -58,9 +57,11 @@ SOLVE_IMPL(Day05, Part2, initial_state, part1_answer) {
     the_src.resize(std::size(the_src) - count);
   }
   // accumulate into string
-  return std::accumulate(std::begin(stacks), std::end(stacks), std::string{}, [](std::string res, auto const &stack) {
-    return res + stack.back();
+  std::string result(std::size(stacks), '\0');
+  std::transform(std::begin(stacks), std::end(stacks), std::begin(result), [](auto const &stack) {
+    return stack.back();
   });
+  return result;
 }
 
 INSTANTIATE(Day05);

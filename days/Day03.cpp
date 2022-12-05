@@ -16,10 +16,9 @@ hash(std::string_view s) noexcept {
 
 } // namespace
 
-PARSE_IMPL(Day03, buffer) {
+PARSE_IMPL(Day03, view) {
   std::vector<std::string_view> result;
-  std::string_view view{buffer.data(), buffer.size()};
-  for (sz off{0}; off < std::size(buffer); ) {
+  for (sz off{0}; off < std::size(view); ) {
     std::string_view line;
     off += read<"\0\n">(view.substr(off), line);
     result.push_back(line);
