@@ -62,8 +62,8 @@ run_one(report_data &data, run_options const &options) {
   curr /= options.benchmark.value_or(1);
 
   data[DayIdx] = report_line{fmt::format("Day {:02}", CurrentDay::number),
-                             options.format(part1_answer),
-                             options.format(part2_answer),
+                             options.format_answer(part1_answer),
+                             options.format_answer(part2_answer),
                              options.format(curr.parsing),
                              options.format(curr.part1),
                              options.format(curr.part2),
@@ -76,9 +76,13 @@ std::tuple<timing_data, report_data>
 run(run_options const &options) noexcept {
   report_data entries;
   timing_data summary;
-  static_for<implemented_days>([]<sz Day>(timing_data& total, report_data& data, run_options const& opts) {
-    total += run_one<Day>(data, opts);
-  }, summary, entries, options);
+  static_for<implemented_days>(
+      []<sz Day>(timing_data &total, report_data &data, run_options const &opts) {
+        total += run_one<Day>(data, opts);
+      },
+      summary,
+      entries,
+      options);
   return std::tuple{summary, entries};
 }
 
@@ -88,12 +92,14 @@ main(int argc, char **argv) {
   bool help{false};
   bool error{false};
 
-  for (int c; (c = getopt(argc, argv, "h12TCd:p:b:")) != -1;) {
-    switch (c) {
+  while (true) {
+    switch (int const curr_opt{getopt(argc, argv, "h12TCNMd:p:b:")}; curr_opt) {
+    case -1:
+      goto option_parsing_done;
     case 'd': {
       u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
       if (value == 0 || value > implemented_days) {
-        fprintf(stderr, "Option -%c requires day to be implemented.\n", optopt);
+        fprintf(stderr, "Option -%c requires day to be implemented.\n", curr_opt);
         error = true;
       } else {
         options.single = value - 1;
@@ -105,17 +111,9 @@ main(int argc, char **argv) {
       break;
     case '1':
       options.part2 = false;
-      if (not options.part1) {
-        fprintf(stderr, "Cannot suppress both days\n");
-        error = true;
-      }
       break;
     case '2':
       options.part1 = false;
-      if (not options.part2) {
-        fprintf(stderr, "Cannot suppress both days\n");
-        error = true;
-      }
       break;
     case 'T':
       options.timing = false;
@@ -123,10 +121,16 @@ main(int argc, char **argv) {
     case 'C':
       options.colorize = false;
       break;
+    case 'N':
+      options.answers = false;
+      break;
+    case 'M':
+      options.mask = true;
+      break;
     case 'b': {
       u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
       if (value == 0) {
-        fprintf(stderr, "Option -%c requires value to be positive and non-zero.\n", optopt);
+        fprintf(stderr, "Option -%c requires value to be positive and non-zero.\n", curr_opt);
         error = true;
       } else {
         options.benchmark = value;
@@ -135,11 +139,11 @@ main(int argc, char **argv) {
     }
     case '?':
       if (optopt == 'p' || optopt == 'd') {
-        fprintf(stderr, "Option -%c requires an argument.\n", c);
+        fprintf(stderr, "Option -%c requires an argument.\n", optopt);
       } else if (isprint(optopt)) {
-        fprintf(stderr, "Unknown option `-%c'.\n", c);
+        fprintf(stderr, "Unknown option `-%c'.\n", optopt);
       } else {
-        fprintf(stderr, "Unknown option character `\\x%x'.\n", c);
+        fprintf(stderr, "Unknown option character `\\x%x'.\n", optopt);
       }
       [[fallthrough]];
     default:
@@ -149,23 +153,31 @@ main(int argc, char **argv) {
       help = true;
     }
   }
+option_parsing_done:
 
-  if (help) {
-    fmt::print("Advent of Code 2022 (in Modern C++)\n");
-    fmt::print("Created by William Killian (willkill07)\n\n");
-    fmt::print("Usage: {} [-h | [-1|-2] [-T] [-C] [-d <day_num>] [-p <prec>] [-b <times>]] \n\n", argv[0]);
-    fmt::print("    -h           show help\n");
-    fmt::print("    -d <day_num> run single day\n");
-    fmt::print("    -1           only show and run part 1\n");
-    fmt::print("    -2           only show part 2\n");
-    fmt::print("    -T           disable timing\n");
-    fmt::print("    -C           disable color output\n");
-    fmt::print("    -p <prec=2>  precision of timing output\n");
-    fmt::print("    -b <times>   benchmark run (repetition amount)\n");
-    return EXIT_SUCCESS;
-  }
-  if (error) {
-    return EXIT_FAILURE;
+  error = error or not options.validate();
+
+  if (help or error) {
+    fmt::print(R"AOC_HELP(
+Advent of Code 2022 (in Modern C++)
+(c) 2022 William Killian
+
+Usage: {} [-h|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_num>]]
+
+    -h             show help
+    -d <day_num>   run single day
+    -1             only show and run part 1
+    -2             only show part 2
+    -T             suppress timing
+    -N             suppress answers
+    -C             suppress color output
+    -M             mask answers
+    -p <prec={}>    precision of timing output
+    -b <times>     benchmark run repetition amount
+)AOC_HELP",
+               argv[0],
+               run_options::default_precision);
+    return (error ? EXIT_FAILURE : EXIT_SUCCESS);
   }
 
   auto [summary, entries] = run(options);

@@ -3,46 +3,57 @@
 #include <concepts>
 #include <optional>
 #include <string>
+#include <string_view>
 
 #include <fmt/core.h>
 
 #include "Types.hpp"
 
 struct run_options {
-  u32 precision{2};
+  constexpr inline static u32 default_precision{2};
+  std::optional<u32> precision;
   bool colorize{true};
   bool timing{true};
   bool part2{true};
   bool part1{true};
+  bool answers{true};
+  bool mask{false};
   std::optional<u32> single{std::nullopt};
   std::optional<u32> benchmark{std::nullopt};
 
-  inline std::string format(std::integral auto value) const noexcept {
+  [[nodiscard]] inline std::string format(std::integral auto value) const noexcept {
     return fmt::format("{0}", value);
   }
 
-  inline std::string format(std::floating_point auto value) const noexcept {
-    return fmt::format("{0:.{1}f}", value, precision);
+  [[nodiscard]] inline std::string format(std::floating_point auto value) const noexcept {
+    return fmt::format("{0:.{1}f}", value, precision.value_or(run_options::default_precision));
   }
 
-  inline std::string const &format(std::string const &value) const noexcept {
-    return value;
+  [[nodiscard]] inline std::string format(std::string_view view) const noexcept {
+    return std::string{view};
   }
 
-  inline std::string format(std::string &&value) const noexcept {
-    return std::string{value};
+  template <typename T>
+  [[nodiscard]] inline std::string format_answer(T &&value) const noexcept {
+    if (std::string result{format(std::forward<T>(value))}; mask) {
+      std::fill(std::begin(result), std::end(result), 'X');
+      return result;
+    } else {
+      return result;
+    }
+  }
+  
+  [[nodiscard]] inline auto group_mask() const noexcept {
+    return std::array{true, answers, timing};
   }
 
-  inline auto group_mask() const noexcept {
-    return std::array{true, true, timing};
+  [[nodiscard]] inline auto content_mask() const noexcept {
+    return std::array{true, part1 and answers, part2 and answers, timing, part1 and timing, part2 and timing, timing};
   }
 
-  inline auto content_mask() const noexcept {
-    return std::array{true, part1, part2, timing, part1 && timing, part2 && timing, timing};
-  }
-
-  inline auto summary_mask() const noexcept {
+  [[nodiscard]] inline auto summary_mask() const noexcept {
     return std::array{true, timing, timing, timing, timing};
   }
 
+  [[nodiscard]] bool validate() const noexcept;
 };

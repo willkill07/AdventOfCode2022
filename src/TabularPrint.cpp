@@ -60,14 +60,13 @@ print_data_row(std::array<T, Data> const &data,
   fmt::print("{}\n", String[Width * 2]);
 }
 
-template <fixed_string String, typename T, sz Data, sz Width>
-void
-print_data_row(std::array<T, Data> const &data,
-               std::array<sz, Width> const &widths) noexcept
-{
-  std::array<FormatFn<std::string>, Width> styles;
-  styles.fill(colors::plain);
-  print_data_row<String>(data, widths, styles);
+template <sz Width>
+inline std::array<FormatFn<std::string>, Width>
+maybe_plain(bool color_condition, std::array<FormatFn<std::string>, Width> arr) noexcept {
+  if (not color_condition) {
+    arr.fill(colors::plain);
+  }
+  return arr;
 }
 
 void
@@ -81,7 +80,7 @@ print_table(run_options const &opts, report_data const &entries, timing_data con
 
   constexpr std::array const group_names{"", "Solutions", "Timing (μs)"};
   constexpr std::array const header_names{"AoC++2022", "Part 1", "Part 2", "Parse", "Part 1", "Part 2", "Total"};
-  std::array const summary_data{opts.format("Summary"s),
+  std::array const summary_data{"Summary"s,
                                 opts.format(sum.parsing),
                                 opts.format(sum.part1),
                                 opts.format(sum.part2),
@@ -123,40 +122,20 @@ print_table(run_options const &opts, report_data const &entries, timing_data con
                                             colors::yellow};
 
   print_edge_row<"  ╭─┬─╮">(group_widths);
-  if (opts.colorize) {
-    print_data_row<" ^│^│^│">(group_names, group_widths, group_colors);
-  } else {
-    print_data_row<" ^│^│^│">(group_names, group_widths);
-  }
+  print_data_row<" ^│^│^│">(group_names, group_widths, maybe_plain(opts.colorize, group_colors));
   print_edge_row<"╭─┼─┬─┼─┬─┬─┬─┤">(content_widths);
-  if (opts.colorize) {
-    print_data_row<"│^│^│^│^│^│^│^│">(header_names, content_widths, header_colors);
-  } else {
-    print_data_row<"│^│^│^│^│^│^│^│">(header_names, content_widths);
-  }
+  print_data_row<"│^│^│^│^│^│^│^│">(header_names, content_widths, maybe_plain(opts.colorize, header_colors));
   print_edge_row<"├─┼─┼─┼─┼─┼─┼─┤">(content_widths);
   if (opts.single.has_value()) {
     u32 const day{opts.single.value()};
-    if (opts.colorize) {
-      print_data_row<"│^│<│<│>│>│>│>│">(entries[day], content_widths, content_colors);
-    } else {
-      print_data_row<"│^│<│<│>│>│>│>│">(entries[day], content_widths);
-    }
+    print_data_row<"│^│<│<│>│>│>│>│">(entries[day], content_widths, maybe_plain(opts.colorize, content_colors));
   } else {
     for (auto const &entry : entries) {
-      if (opts.colorize) {
-        print_data_row<"│^│<│<│>│>│>│>│">(entry, content_widths, content_colors);
-      } else {
-        print_data_row<"│^│<│<│>│>│>│>│">(entry, content_widths);
-      }
+      print_data_row<"│^│<│<│>│>│>│>│">(entry, content_widths, maybe_plain(opts.colorize, content_colors));
     }
     if (opts.timing) {
       print_edge_row<"├─┴─┴─┼─┼─┼─┼─┤">(content_widths);
-      if (opts.colorize) {
-        print_data_row<"│^│>│>│>│>│">(summary_data, summary_widths, summary_colors);
-      } else {
-        print_data_row<"│^│>│>│>│>│">(summary_data, summary_widths);
-      }
+      print_data_row<"│^│>│>│>│>│">(summary_data, summary_widths, maybe_plain(opts.colorize, summary_colors));
       print_edge_row<"╰─┴─┴─┴─┴─╯">(summary_widths);
       return;
     }
