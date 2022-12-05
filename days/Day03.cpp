@@ -1,8 +1,6 @@
 #include <bit>
 #include <numeric>
 
-#include <cctype>
-
 #include "Day03.hpp"
 
 namespace {

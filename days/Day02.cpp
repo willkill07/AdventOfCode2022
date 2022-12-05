@@ -1,6 +1,7 @@
 #include <numeric>
 
 #include "Day02.hpp"
+#include "Parsing.hpp"
 
 template <bool Part2>
 consteval day02::lookup_table_t
