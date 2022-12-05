@@ -10,8 +10,10 @@
 
 struct run_options {
   u32 precision{2};
+  bool colorize{true};
   bool timing{true};
   bool part2{true};
+  bool part1{true};
   std::optional<u32> single{std::nullopt};
   std::optional<u32> benchmark{std::nullopt};
 
@@ -36,7 +38,7 @@ struct run_options {
   }
 
   inline auto content_mask() const noexcept {
-    return std::array{true, true, part2, timing, timing, part2 && timing, timing};
+    return std::array{true, part1, part2, timing, part1 && timing, part2 && timing, timing};
   }
 
   inline auto summary_mask() const noexcept {

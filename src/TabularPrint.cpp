@@ -7,6 +7,7 @@
 #include "FixedString.hpp"
 #include "Formatting.hpp"
 #include "MetaUtils.hpp"
+#include "Options.hpp"
 #include "TabularPrint.hpp"
 #include "Types.hpp"
 #include "WidthCalculator.hpp"
@@ -18,7 +19,12 @@ print_edge_row(std::array<sz, Width> const &widths) {
   static_for<Width>(
       []<sz I>(std::array<sz, Width> const &w) {
         if (w[I] > 0) {
-          fmt::print("{}", String[2 * I]);
+          // find the left-most edge to print in case of hiding columns
+          sz skipped{0};
+          while (I > 1 and w[I - 1 - skipped] == 0) {
+            ++skipped;
+          }
+          fmt::print("{}", String[2 * (I - skipped)]);
           auto const fmt_str = fmt::format("{{:{}^{}}}", String[2 * I + 1], w[I] + 2);
           fmt::vprint(fmt_str, fmt::make_format_args(""));
         }
@@ -31,7 +37,7 @@ template <fixed_string String, typename T, sz Data, sz Width, sz Style>
 void
 print_data_row(std::array<T, Data> const &data,
                std::array<sz, Width> const &widths,
-               std::array<FormatFn<std::string>, Style> const &stylizers) {
+               std::array<FormatFn<std::string>, Style> const &stylizers) noexcept {
 
   constexpr sz const elements = (String.printable_size - 1) / 2;
   static_assert((String.printable_size & 1) == 1, "table format string must have odd length");
@@ -52,6 +58,16 @@ print_data_row(std::array<T, Data> const &data,
       widths,
       stylizers);
   fmt::print("{}\n", String[Width * 2]);
+}
+
+template <fixed_string String, typename T, sz Data, sz Width>
+void
+print_data_row(std::array<T, Data> const &data,
+               std::array<sz, Width> const &widths) noexcept
+{
+  std::array<FormatFn<std::string>, Width> styles;
+  styles.fill(colors::plain);
+  print_data_row<String>(data, widths, styles);
 }
 
 void
@@ -107,20 +123,40 @@ print_table(run_options const &opts, report_data const &entries, timing_data con
                                             colors::yellow};
 
   print_edge_row<"  ╭─┬─╮">(group_widths);
-  print_data_row<" ^│^│^│">(group_names, group_widths, group_colors);
+  if (opts.colorize) {
+    print_data_row<" ^│^│^│">(group_names, group_widths, group_colors);
+  } else {
+    print_data_row<" ^│^│^│">(group_names, group_widths);
+  }
   print_edge_row<"╭─┼─┬─┼─┬─┬─┬─┤">(content_widths);
-  print_data_row<"│^│^│^│^│^│^│^│">(header_names, content_widths, header_colors);
+  if (opts.colorize) {
+    print_data_row<"│^│^│^│^│^│^│^│">(header_names, content_widths, header_colors);
+  } else {
+    print_data_row<"│^│^│^│^│^│^│^│">(header_names, content_widths);
+  }
   print_edge_row<"├─┼─┼─┼─┼─┼─┼─┤">(content_widths);
   if (opts.single.has_value()) {
     u32 const day{opts.single.value()};
-    print_data_row<"│^│<│<│>│>│>│>│">(entries[day], content_widths, content_colors);
+    if (opts.colorize) {
+      print_data_row<"│^│<│<│>│>│>│>│">(entries[day], content_widths, content_colors);
+    } else {
+      print_data_row<"│^│<│<│>│>│>│>│">(entries[day], content_widths);
+    }
   } else {
     for (auto const &entry : entries) {
-      print_data_row<"│^│<│<│>│>│>│>│">(entry, content_widths, content_colors);
+      if (opts.colorize) {
+        print_data_row<"│^│<│<│>│>│>│>│">(entry, content_widths, content_colors);
+      } else {
+        print_data_row<"│^│<│<│>│>│>│>│">(entry, content_widths);
+      }
     }
     if (opts.timing) {
       print_edge_row<"├─┴─┴─┼─┼─┼─┼─┤">(content_widths);
-      print_data_row<"│^│>│>│>│>│">(summary_data, summary_widths, summary_colors);
+      if (opts.colorize) {
+        print_data_row<"│^│>│>│>│>│">(summary_data, summary_widths, summary_colors);
+      } else {
+        print_data_row<"│^│>│>│>│>│">(summary_data, summary_widths);
+      }
       print_edge_row<"╰─┴─┴─┴─┴─╯">(summary_widths);
       return;
     }

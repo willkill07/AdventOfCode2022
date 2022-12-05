@@ -88,7 +88,7 @@ main(int argc, char **argv) {
   bool help{false};
   bool error{false};
 
-  for (int c; (c = getopt(argc, argv, "h1Td:p:b:")) != -1;) {
+  for (int c; (c = getopt(argc, argv, "h12TCd:p:b:")) != -1;) {
     switch (c) {
     case 'd': {
       u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
@@ -105,9 +105,23 @@ main(int argc, char **argv) {
       break;
     case '1':
       options.part2 = false;
+      if (not options.part1) {
+        fprintf(stderr, "Cannot suppress both days\n");
+        error = true;
+      }
+      break;
+    case '2':
+      options.part1 = false;
+      if (not options.part2) {
+        fprintf(stderr, "Cannot suppress both days\n");
+        error = true;
+      }
       break;
     case 'T':
       options.timing = false;
+      break;
+    case 'C':
+      options.colorize = false;
       break;
     case 'b': {
       u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
@@ -139,11 +153,13 @@ main(int argc, char **argv) {
   if (help) {
     fmt::print("Advent of Code 2022 (in Modern C++)\n");
     fmt::print("Created by William Killian (willkill07)\n\n");
-    fmt::print("Usage: {} [-h | [-1] [-T] [-d <day_num>] [-p <prec>] [-b <times>]] \n\n", argv[0]);
+    fmt::print("Usage: {} [-h | [-1|-2] [-T] [-C] [-d <day_num>] [-p <prec>] [-b <times>]] \n\n", argv[0]);
     fmt::print("    -h           show help\n");
     fmt::print("    -d <day_num> run single day\n");
-    fmt::print("    -1           only run part 1\n");
+    fmt::print("    -1           only show and run part 1\n");
+    fmt::print("    -2           only show part 2\n");
     fmt::print("    -T           disable timing\n");
+    fmt::print("    -C           disable color output\n");
     fmt::print("    -p <prec=2>  precision of timing output\n");
     fmt::print("    -b <times>   benchmark run (repetition amount)\n");
     return EXIT_SUCCESS;
