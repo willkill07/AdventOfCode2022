@@ -14,7 +14,7 @@ PARSE_IMPL(Day04, buffer) {
 
 SOLVE_IMPL(Day04, Part2, ranges, part1_answer) {
   u32 sum{0};
-  for (auto const r : ranges) {
+  for (auto const &r : ranges) {
     sum += static_cast<u32>(Part2 ? r.overlaps() : r.encloses());
   }
   return sum;
