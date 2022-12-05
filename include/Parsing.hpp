@@ -71,15 +71,18 @@ read(std::string_view view, Ts &...vals) noexcept {
           static_assert(in_bounds(CurrIndex + 1, FormatStr), "Must have trailing character after placeholder");
           static_assert(implies(in_bounds(CurrIndex + 1, FormatStr), not is_placeholder(FormatStr(CurrIndex + 1))),
                         "Two placeholders must not be adjacent");
-          sz const len = v.find_first_of(FormatStr(CurrIndex + 1), off) - off;
           using T = std::tuple_element_t<CurrChar, Types>;
+          // calculate length of string_view matching criteria
+          sz const len = v.find_first_of(FormatStr(CurrIndex + 1), off) - off;
+          // update reference with parsed value
           std::get<CurrChar>(vals) = read<T>(v.substr(off, len));
           // consume the char after the placeholder too
-          off += len + 1;
-        } else if constexpr (CurrIndex > 0 and not is_placeholder(FormatStr(CurrIndex - 1))) {
-          // only advance if we are first or if we are NOT preceded by a placeholder
-          ++off;
+          off += len;
+        } else if constexpr (CurrIndex > 0 and is_placeholder(FormatStr(CurrIndex - 1))) {
+          // do not advance if we are preceded by a placeholder
+          --off;
         }
+        ++off;
       },
       view,
       offset,
