@@ -20,12 +20,12 @@ exclusive_sum(std::array<T, N> const &arr) noexcept {
   return result;
 }
 
-template <auto N>
+template <auto N, typename Fn, typename... Args>
 void
-static_for(auto &&body) noexcept {
+static_for(Fn &&body, Args &&...args) noexcept {
   using T = decltype(N);
-  [&]<T... Is>(std::integer_sequence<T, Is...>) {
-    (body.template operator()<Is>(), ...);
+  []<T... Is>(std::integer_sequence<T, Is...>, Fn && f, Args && ...a) {
+    (f.template operator()<Is>(std::forward<Args>(a)...), ...);
   }
-  (std::make_integer_sequence<T, N>{});
+  (std::make_integer_sequence<T, N>{}, std::forward<Fn>(body), std::forward<Args>(args)...);
 }

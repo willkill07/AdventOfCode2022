@@ -52,11 +52,11 @@ private:
   }
 };
 
-template <fixed_string Str>
+template <fixed_string Str, typename Fn, typename... Args>
 [[gnu::always_inline]] inline void
-iterate(auto &&callback) noexcept {
-  [&]<sz... Ids>(std::integer_sequence<sz, Ids...>) {
-    (callback.template operator()<Ids, Str(Ids)>(), ...);
+iterate(Fn &&callback, Args &&...args) noexcept {
+  []<sz... Ids>(std::integer_sequence<sz, Ids...>, auto &&cb, Args &&...a) {
+    (cb.template operator()<Ids, Str(Ids)>(std::forward<Args>(a)...), ...);
   }
-  (std::make_integer_sequence<sz, Str.size>{});
+  (std::make_integer_sequence<sz, Str.size>{}, std::forward<Fn>(callback), std::forward<Args>(args)...);
 }

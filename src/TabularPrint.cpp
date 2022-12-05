@@ -15,13 +15,15 @@ template <fixed_string String, sz Width>
 void
 print_edge_row(std::array<sz, Width> const &widths) {
   static_assert(String.printable_size == Width * 2 + 1, "table format string mismatch for width");
-  static_for<Width>([&]<sz I>() {
-    if (widths[I] > 0) {
-      fmt::print("{}", String[2 * I]);
-      auto const fmt_str = fmt::format("{{:{}^{}}}", String[2 * I + 1], widths[I] + 2);
-      fmt::vprint(fmt_str, fmt::make_format_args(""));
-    }
-  });
+  static_for<Width>(
+      []<sz I>(std::array<sz, Width> const &w) {
+        if (w[I] > 0) {
+          fmt::print("{}", String[2 * I]);
+          auto const fmt_str = fmt::format("{{:{}^{}}}", String[2 * I + 1], w[I] + 2);
+          fmt::vprint(fmt_str, fmt::make_format_args(""));
+        }
+      },
+      widths);
   fmt::print("{}\n", String[Width * 2]);
 }
 
@@ -38,13 +40,17 @@ print_data_row(std::array<T, Data> const &data,
   static_assert(elements == Data, "table format string mismatch for data");
   static_assert(elements == Style, "table format string mismatch for stylizers");
 
-  static_for<Width>([&]<sz I>() {
-    if (widths[I] > 0) {
-      auto const fmt_str = fmt::format("{{: {0}{1}}}", String[2 * I + 1], widths[I]);
-      auto const str = fmt::vformat(fmt_str, fmt::make_format_args(data[I]));
-      fmt::print("{} {} ", String[2 * I], stylizers[I](str));
-    }
-  });
+  static_for<Width>(
+      []<sz I>(auto const &d, auto const &w, auto const &s) {
+        if (w[I] > 0) {
+          auto const fmt_str = fmt::format("{{: {0}{1}}}", String[2 * I + 1], w[I]);
+          auto const str = fmt::vformat(fmt_str, fmt::make_format_args(d[I]));
+          fmt::print("{} {} ", String[2 * I], s[I](str));
+        }
+      },
+      data,
+      widths,
+      stylizers);
   fmt::print("{}\n", String[Width * 2]);
 }
 
@@ -64,7 +70,7 @@ print_table(run_options const &opts, report_data const &entries, timing_data con
                                 opts.format(sum.part1),
                                 opts.format(sum.part2),
                                 opts.format(sum.total())};
-  
+
   width_calculator<7> calc{header_names, opts.content_mask()};
   calc.update<group_grouping>(group_names);
   for (auto const &entry : entries) {
@@ -75,7 +81,6 @@ print_table(run_options const &opts, report_data const &entries, timing_data con
   std::array const group_widths = calc.get<group_grouping>(opts.group_mask());
   std::array const content_widths = calc.get<content_grouping>(opts.content_mask());
   std::array const summary_widths = calc.get<summary_grouping>(opts.summary_mask());
-
 
   constexpr std::array const group_colors{colors::plain, colors::header_plain, colors::header_plain};
 

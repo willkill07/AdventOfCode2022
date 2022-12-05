@@ -4,7 +4,7 @@ project(AdventOfCode2021 CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
 set(CMAKE_BUILD_TYPE Release)
 
-set(common_flags -Wall -Wextra -Wpedantic -Wconversion -Wuninitialized)
+set(common_flags -Wall -Wextra -Wpedantic -Wconversion -Wuninitialized -Wshadow)
 if(NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "AppleClang")
   list(APPEND common_flags -march=native)
 endif()
