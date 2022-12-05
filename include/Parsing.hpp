@@ -2,11 +2,11 @@
 
 #include <concepts>
 #include <numeric>
+#include <string_view>
 #include <tuple>
 #include <utility>
 
 #include "FixedString.hpp"
-
 
 template <typename T>
 T
@@ -17,6 +17,12 @@ template <>
 read<char>(std::string_view s) noexcept {
   if (s.empty()) return {};
   return s[0];
+}
+
+template <>
+[[gnu::always_inline, gnu::flatten]] inline std::string_view
+read<std::string_view>(std::string_view s) noexcept {
+  return s;
 }
 
 template <std::unsigned_integral T>

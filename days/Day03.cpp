@@ -2,6 +2,7 @@
 #include <numeric>
 
 #include "Day03.hpp"
+#include "Parsing.hpp"
 
 namespace {
 
@@ -18,10 +19,10 @@ hash(std::string_view s) noexcept {
 PARSE_IMPL(Day03, buffer) {
   std::vector<std::string_view> result;
   std::string_view view{buffer.data(), buffer.size()};
-  for (sz off{0}; off < std::size(buffer); ++off) {
-    auto const length = view.find_first_of('\n', off) - off;
-    result.push_back(view.substr(off, length));
-    off += length;
+  for (sz off{0}; off < std::size(buffer); ) {
+    std::string_view line;
+    off += read<"\0\n">(view.substr(off), line);
+    result.push_back(line);
   }
   return result;
 }
