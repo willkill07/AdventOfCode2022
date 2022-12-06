@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <numeric>
 #include <vector>
 
 #include "Day05.hpp"
@@ -9,7 +8,7 @@ PARSE_IMPL(Day05, view) {
   // determine number of stacks by looking at line length
   sz const num_stacks{(view.find_first_of('\n') + 1) / 4};
   // create stacks
-  std::vector<std::vector<char>> stacks{num_stacks};
+  std::vector<day05::stack_t> stacks{num_stacks};
   sz off{0};
   // exit condition for parsing; line is ' 1   2   3  ...'
   while (not('0' <= view[off + 1] and view[off + 1] <= '9')) {
@@ -43,18 +42,8 @@ SOLVE_IMPL(Day05, Part2, initial_state, part1_answer) {
   // need to make a copy from read-only input
   auto stacks = initial_state.stacks;
   // walk through all commands
-  for (auto const &[count, src, dst] : initial_state.commands) {
-    auto &the_src = stacks[src - 1];
-    auto &the_dst = stacks[dst - 1];
-    if constexpr (Part2) {
-      // move and preserve order -- use random-access iterator
-      std::copy_n(std::end(the_src) - count, count, std::back_inserter(the_dst));
-    } else {
-      // move and reverse order -- use reverse random-access iterator
-      std::copy_n(std::rbegin(the_src), count, std::back_inserter(the_dst));
-    }
-    // remove 'count' elements from src stack
-    the_src.resize(std::size(the_src) - count);
+  for (auto const& command : initial_state.commands) {
+    command.execute<Part2>(stacks);
   }
   // accumulate into string
   std::string result(std::size(stacks), '\0');
