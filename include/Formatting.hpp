@@ -8,10 +8,13 @@
 template <typename T>
 using FormatFn = fmt::detail::styled_arg<std::remove_cvref_t<T>> (*)(T const &) noexcept;
 
+// singleton static flag for fast (done-once TTY detection)
+extern bool const is_a_tty{static_cast<bool>(isatty(STDOUT_FILENO))};
+
 template <fmt::emphasis... Emphs>
 fmt::detail::styled_arg<std::string>
 print_plain(std::string const &v) noexcept {
-  if (isatty(STDOUT_FILENO)) {
+  if (is_a_tty) {
     return fmt::styled(v, (fmt::text_style{} | ... | fmt::text_style{Emphs}));
   } else {
     return fmt::styled(v, fmt::text_style{});
@@ -21,7 +24,7 @@ print_plain(std::string const &v) noexcept {
 template <fmt::color Color, fmt::emphasis... Emphs>
 fmt::detail::styled_arg<std::string>
 print(std::string const &v) noexcept {
-  if (isatty(STDOUT_FILENO)) {
+  if (is_a_tty) {
     return fmt::styled(v, (fmt::fg(Color) | ... | fmt::text_style{Emphs}));
   } else {
     return fmt::styled(v, fmt::text_style{});

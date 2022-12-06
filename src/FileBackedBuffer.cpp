@@ -22,14 +22,22 @@ file_backed_buffer::file_backed_buffer(std::string const &filename) noexcept
         if (fd < 0) {
           return nullptr;
         } else {
-          return reinterpret_cast<char const *>(mmap(NULL, len, PROT_READ, MAP_PRIVATE, fd, 0));
+          bool mmap_flags = MAP_PRIVATE;
+          #if __linux__
+            mmap_flags |= MAP_LOCKED | MAP_POPULATE;
+          #endif
+          void *addr = mmap(NULL, len, PROT_READ, mmap_flags, fd, 0);
+          (void)mlock(addr, len);
+          (void)madvise(addr, len, MADV_SEQUENTIAL);
+          return reinterpret_cast<char const *>(addr);
         }
       }(file_desc, buffer_length)) {
 }
 
 file_backed_buffer::~file_backed_buffer() noexcept {
   if (buffer_address != nullptr) {
-    munmap(const_cast<void *>(reinterpret_cast<void const *>(buffer_address)), buffer_length);
+    (void)munlock(buffer_address, buffer_length);
+    (void)munmap(const_cast<void *>(reinterpret_cast<void const *>(buffer_address)), buffer_length);
   }
   if (file_desc >= 0) {
     (void)close(file_desc);
