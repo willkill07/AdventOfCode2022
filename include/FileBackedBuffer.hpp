@@ -6,7 +6,7 @@
 #include "Types.hpp"
 
 class file_backed_buffer {
-  sz const buffer_length;
+  usize const buffer_length;
   int const file_desc;
   char const *const buffer_address;
 

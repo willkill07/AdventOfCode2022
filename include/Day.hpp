@@ -2,8 +2,12 @@
 
 #include <cstdio>
 #include <optional>
-#include <span>
+#include <string_view>
 #include <type_traits>
+
+#include <doctest/doctest.h>
+
+using std::string_view_literals::operator""sv;
 
 #include "Types.hpp"
 

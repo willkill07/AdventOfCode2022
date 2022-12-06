@@ -6,13 +6,13 @@
 
 #include "Types.hpp"
 
-template <typename T, sz N>
+template <typename T, usize N>
 consteval T
 sum(std::array<T, N> const &arr) noexcept {
   return std::accumulate(std::begin(arr), std::end(arr), T{0});
 }
 
-template <typename T, sz N>
+template <typename T, usize N>
 consteval std::array<T, N>
 exclusive_sum(std::array<T, N> const &arr) noexcept {
   std::array<T, N> result;

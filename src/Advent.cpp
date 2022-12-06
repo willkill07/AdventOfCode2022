@@ -16,7 +16,7 @@
 #include "Timing.hpp"
 #include "Types.hpp"
 
-template <sz DayIdx>
+template <usize DayIdx>
 timing_data
 run_one(report_data &data, run_options const &options) {
   using CurrentDay = std::tuple_element_t<DayIdx, all_days>;
@@ -77,7 +77,7 @@ run(run_options const &options) noexcept {
   report_data entries;
   timing_data summary;
   static_for<implemented_days>(
-      []<sz Day>(timing_data &total, report_data &data, run_options const &opts) {
+      []<usize Day>(timing_data &total, report_data &data, run_options const &opts) {
         total += run_one<Day>(data, opts);
       },
       summary,

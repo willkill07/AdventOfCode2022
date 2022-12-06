@@ -12,15 +12,15 @@
 #include "Types.hpp"
 #include "WidthCalculator.hpp"
 
-template <fixed_string String, sz Width>
+template <fixed_string String, usize Width>
 void
-print_edge_row(std::array<sz, Width> const &widths) {
+print_edge_row(std::array<usize, Width> const &widths) {
   static_assert(String.printable_size == Width * 2 + 1, "table format string mismatch for width");
   static_for<Width>(
-      []<sz I>(std::array<sz, Width> const &w) {
+      []<usize I>(std::array<usize, Width> const &w) {
         if (w[I] > 0) {
           // find the left-most edge to print in case of hiding columns
-          sz skipped{0};
+          usize skipped{0};
           while (I > 1 and w[I - 1 - skipped] == 0) {
             ++skipped;
           }
@@ -33,13 +33,13 @@ print_edge_row(std::array<sz, Width> const &widths) {
   fmt::print("{}\n", String[Width * 2]);
 }
 
-template <fixed_string String, typename T, sz Data, sz Width, sz Style>
+template <fixed_string String, typename T, usize Data, usize Width, usize Style>
 void
 print_data_row(std::array<T, Data> const &data,
-               std::array<sz, Width> const &widths,
+               std::array<usize, Width> const &widths,
                std::array<FormatFn<std::string>, Style> const &stylizers) noexcept {
 
-  constexpr sz const elements = (String.printable_size - 1) / 2;
+  constexpr usize const elements = (String.printable_size - 1) / 2;
   static_assert((String.printable_size & 1) == 1, "table format string must have odd length");
   static_assert(String.printable_size > 2, "table format string must be at least 3");
   static_assert(elements == Width, "table format string mismatch for width");
@@ -47,7 +47,7 @@ print_data_row(std::array<T, Data> const &data,
   static_assert(elements == Style, "table format string mismatch for stylizers");
 
   static_for<Width>(
-      []<sz I>(auto const &d, auto const &w, auto const &s) {
+      []<usize I>(auto const &d, auto const &w, auto const &s) {
         if (w[I] > 0) {
           auto const fmt_str = fmt::format("{{: {0}{1}}}", String[2 * I + 1], w[I]);
           auto const str = fmt::vformat(fmt_str, fmt::make_format_args(d[I]));
@@ -60,7 +60,7 @@ print_data_row(std::array<T, Data> const &data,
   fmt::print("{}\n", String[Width * 2]);
 }
 
-template <sz Width>
+template <usize Width>
 inline std::array<FormatFn<std::string>, Width>
 maybe_plain(bool color_condition, std::array<FormatFn<std::string>, Width> arr) noexcept {
   if (not color_condition) {

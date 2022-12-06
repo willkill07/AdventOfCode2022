@@ -45,27 +45,27 @@ read(std::string_view s) noexcept
   if (s.empty())
     return {};
   bool const neg{s.front() == '-'};
-  T const value{static_cast<T>(read<std::make_unsigned_t<T>>(s.substr(static_cast<sz>(neg))))};
+  T const value{static_cast<T>(read<std::make_unsigned_t<T>>(s.substr(static_cast<usize>(neg))))};
   return neg ? -value : value;
 }
 
 template <fixed_string FormatStr, typename... Ts>
-[[gnu::always_inline, gnu::flatten]] inline sz
+[[gnu::always_inline, gnu::flatten]] inline usize
 read(std::string_view view, Ts &...vals) noexcept {
   using Types = std::tuple<Ts...>;
-  constexpr sz const Elems = sizeof...(Ts);
+  constexpr usize const Elems = sizeof...(Ts);
   auto values = std::tie(vals...);
-  sz offset{0};
+  usize offset{0};
   iterate<FormatStr>(
-      []<sz CurrIndex, char CurrChar> [[gnu::flatten, gnu::always_inline]] (auto const &v, auto &off, auto &vals) {
+      []<usize CurrIndex, char CurrChar> [[gnu::flatten, gnu::always_inline]] (auto const &v, auto &off, auto &vs) {
         constexpr auto implies = [](bool a, bool b) constexpr noexcept {
           return !a or b;
         };
-        constexpr auto in_bounds = []<sz N>(sz index, fixed_string<N> str) constexpr noexcept {
+        constexpr auto in_bounds = []<usize N>(usize index, fixed_string<N> str) constexpr noexcept {
           return index < str.size;
         };
         constexpr auto is_placeholder = [](char c) constexpr noexcept {
-          return static_cast<sz>(c) < Elems;
+          return static_cast<usize>(c) < Elems;
         };
         if constexpr (is_placeholder(CurrChar)) {
           static_assert(in_bounds(CurrIndex + 1, FormatStr), "Must have trailing character after placeholder");
@@ -73,9 +73,9 @@ read(std::string_view view, Ts &...vals) noexcept {
                         "Two placeholders must not be adjacent");
           using T = std::tuple_element_t<CurrChar, Types>;
           // calculate length of string_view matching criteria
-          sz const len = v.find_first_of(FormatStr(CurrIndex + 1), off) - off;
+          usize const len = v.find_first_of(FormatStr(CurrIndex + 1), off) - off;
           // update reference with parsed value
-          std::get<CurrChar>(vals) = read<T>(v.substr(off, len));
+          std::get<CurrChar>(vs) = read<T>(v.substr(off, len));
           // consume the char after the placeholder too
           off += len;
         } else if constexpr (CurrIndex > 0 and is_placeholder(FormatStr(CurrIndex - 1))) {

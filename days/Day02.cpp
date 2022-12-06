@@ -15,7 +15,7 @@ make_cost_table() noexcept {
 
 PARSE_IMPL(Day02, view) {
   day02::lookup_table_t counts{};
-  for (sz idx{0}; idx < std::size(view); idx += 4) {
+  for (usize idx{0}; idx < std::size(view); idx += 4) {
     ++counts[static_cast<u32>(view[idx] - 'A') * day02::options + static_cast<u32>(view[idx + 2] - 'X')];
   }
   return counts;
@@ -26,3 +26,28 @@ SOLVE_IMPL(Day02, Part2, parse_result, part1_answer) {
 }
 
 INSTANTIATE(Day02);
+
+TEST_CASE("Day 02") {
+  using Day = Day02;
+  constexpr auto const part1_expected = 15;
+  constexpr auto const part2_expected = 12;
+  constexpr std::string_view const sample_input = R"(A Y
+B X
+C Z
+)"sv;
+
+  Day day;
+  auto const view = day.parse(sample_input);
+  auto const part1_actual = day.solve<false>(view);
+  auto const part2_actual = day.solve<true>(view, part1_actual);
+  SUBCASE("Part 1") {
+    (void)part1_actual;
+    (void)part1_expected;
+    CHECK(part1_actual == part1_expected);
+  }
+  SUBCASE("Part 2") {
+    (void)part2_actual;
+    (void)part2_expected;
+    CHECK(part2_actual == part2_expected);
+  }
+}

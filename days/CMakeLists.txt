@@ -1,5 +1,5 @@
-target_sources(advent
-  PUBLIC
+target_sources(advent_days
+  INTERFACE
   Day01.cpp
   Day02.cpp
   Day03.cpp
