@@ -6,6 +6,10 @@
 #include <type_traits>
 #include <utility>
 
+using i8 = std::int8_t;
+using u8 = std::uint8_t;
+using i16 = std::int16_t;
+using u16 = std::uint16_t;
 using i32 = std::int32_t;
 using u32 = std::uint32_t;
 using i64 = std::int64_t;
@@ -37,5 +41,5 @@ constexpr inline false_type false_v{};
 constexpr usize const report_size = 7;
 using report_line = std::array<std::string, report_size>;
 
-constexpr const usize implemented_days = 5;
+constexpr const usize implemented_days = 6;
 using report_data = std::array<report_line, implemented_days>;

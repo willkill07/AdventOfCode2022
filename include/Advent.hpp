@@ -8,5 +8,6 @@
 #include "Day03.hpp"
 #include "Day04.hpp"
 #include "Day05.hpp"
+#include "Day06.hpp"
 
-using all_days = std::tuple<Day01, Day02, Day03, Day04, Day05>;
+using all_days = std::tuple<Day01, Day02, Day03, Day04, Day05, Day06>;
