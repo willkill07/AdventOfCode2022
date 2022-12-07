@@ -1,9 +1,13 @@
-target_sources(advent_days
-  INTERFACE
-  Day01.cpp
-  Day02.cpp
-  Day03.cpp
-  Day04.cpp
-  Day05.cpp
-  Day06.cpp
+add_library(days)
+target_sources(days
+  PRIVATE
+  day01.cpp
+  day02.cpp
+  day03.cpp
+  day04.cpp
+  day05.cpp
+  day06.cpp
 )
+
+target_include_directories(days PUBLIC include)
+target_link_libraries(days PRIVATE advent_common lib)
