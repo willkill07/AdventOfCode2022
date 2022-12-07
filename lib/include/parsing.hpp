@@ -53,6 +53,33 @@ parse(std::string_view s) noexcept {
   }
 }
 
+template <std::floating_point T>
+[[gnu::always_inline, gnu::flatten, nodiscard]] inline T
+parse(std::string_view s) noexcept {
+  bool neg{s.front() == '-'};
+  if (neg) {
+    s = s.substr(1);
+  }
+  double whole{0};
+  while (not s.empty() and s[0] != '.') {
+    whole = whole * 10 + (s[0] - '0');
+    s = s.substr(1);
+  }
+  if (s.empty()) {
+    return static_cast<T>(whole);
+  }
+  // skip dot
+  s = s.substr(1);
+  double frac{0};
+  double div{0};
+  while (not s.empty()) {
+    frac = frac * 10 + (s[0] - '0');
+    div *= 10;
+    s = s.substr(1);
+  }
+  return whole + (frac / div);
+}
+
 template <fixed_string FormatStr, typename... Ts>
 [[gnu::always_inline, gnu::flatten, nodiscard]] inline std::size_t
 parse(std::string_view view, Ts &...vals) noexcept {

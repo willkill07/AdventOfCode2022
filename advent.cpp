@@ -11,6 +11,7 @@
 #include "days/advent_days.hpp"
 #include "file_backed_buffer.hpp"
 #include "fixed_string.hpp"
+#include "graph.hpp"
 #include "meta/utils.hpp"
 #include "options.hpp"
 #include "table.hpp"
@@ -19,7 +20,7 @@
 
 template <usize DayIdx>
 timing_data
-run_one(report_data &data, run_options const &options) {
+run_one(report_data &data, report_timing &timing, run_options const &options) {
   using CurrentDay = std::tuple_element_t<DayIdx, all_days>;
 
   if (options.single.has_value() && options.single.value() != DayIdx) {
@@ -60,6 +61,7 @@ run_one(report_data &data, run_options const &options) {
 
   timing_data curr{.parsing = time_in_us(t0, t1), .part1 = time_in_us(t1, t2), .part2 = time_in_us(t2, t3)};
   curr /= options.benchmark.value_or(1);
+  timing.push_back(curr);
 
   data[DayIdx] = report_line{fmt::format("Day {:02}", CurrentDay::number),
                              options.format_answer(part1_answer),
@@ -74,11 +76,11 @@ run_one(report_data &data, run_options const &options) {
 
 auto
 run(run_options const &options) noexcept {
-  using Result = std::tuple<timing_data, report_data>;
+  using Result = std::tuple<timing_data, report_timing, report_data>;
   return fold<implemented_days>(
-      Result{timing_data{}, implemented_days},
+      Result{timing_data{}, report_timing{}, implemented_days},
       []<usize Day>(Result &acc, constant_t<Day>, run_options const &opts) {
-        std::get<timing_data>(acc) += run_one<Day>(std::get<report_data>(acc), opts);
+        std::get<timing_data>(acc) += run_one<Day>(std::get<report_data>(acc), std::get<report_timing>(acc), opts);
       },
       options);
 }
@@ -90,7 +92,7 @@ main(int argc, char **argv) {
   bool error{false};
 
   while (true) {
-    switch (int const curr_opt{getopt(argc, argv, "ht12TCNMd:p:b:")}; curr_opt) {
+    switch (int const curr_opt{getopt(argc, argv, "htg12TCNMd:p:b:w:")}; curr_opt) {
     case 't':
       return doctest::Context{argc, argv}.run();
       break;
@@ -137,6 +139,19 @@ main(int argc, char **argv) {
       }
       break;
     }
+    case 'g':
+      options.graphs = true;
+      break;
+    case 'w': {
+      u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
+      if (value == 0) {
+        fprintf(stderr, "Option -%c requires value to be positive and non-zero.\n", curr_opt);
+        error = true;
+      } else {
+        options.graph_width = value;
+      }
+      break;
+    }
     case '?':
       if (optopt == 'p' || optopt == 'd') {
         fprintf(stderr, "Option -%c requires an argument.\n", optopt);
@@ -162,7 +177,7 @@ option_parsing_done:
 Advent of Code 2022 (in Modern C++)
 (c) 2022 William Killian
 
-Usage: {} [-h|-t|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_num>]]
+Usage: {} [-h|-t|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_num>| -g [-w <num>]]]
 
     -h             show help
     -t             run tests and exit
@@ -177,13 +192,20 @@ Usage: {} [-h|-t|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_nu
     -M             mask answers
     -p <prec={}>    precision of timing output
     -b <times>     benchmark run repetition amount
+    -g             show graphs
+    -w <width>     width of graphs
 )AOC_HELP",
                argv[0],
                run_options::default_precision);
     return (error ? EXIT_FAILURE : EXIT_SUCCESS);
   }
 
-  auto [summary, entries] = run(options);
+  auto [summary, timing, entries] = run(options);
 
   print(options, entries, summary);
+
+  if (options.graphs) {
+    graph_output(options, timing, entries);
+  }
+  return EXIT_SUCCESS;
 }

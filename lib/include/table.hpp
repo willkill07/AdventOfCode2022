@@ -11,6 +11,7 @@ constexpr usize const report_size = 7;
 using report_line = std::array<std::string, report_size>;
 
 using report_data = std::vector<report_line>;
+using report_timing = std::vector<timing_data>;
 
 void
 print(run_options const &options, report_data const &entries, timing_data const &summary);

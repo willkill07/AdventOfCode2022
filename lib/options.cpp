@@ -31,5 +31,13 @@ run_options::validate() const noexcept {
       valid = false;
     }
   }
+  if (not graphs and graph_width.has_value()) {
+    fprintf(stderr, "Cannot specify graph width when graph output is disabled\n");
+    valid = false;
+  }
+  if (graphs and single.has_value()) {
+    fprintf(stderr, "Cannot specify execution of single day with graph output\n");
+    valid = false;
+  }
   return valid;
 }

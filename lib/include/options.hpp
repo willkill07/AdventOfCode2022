@@ -12,13 +12,16 @@
 
 struct run_options {
   constexpr inline static u32 default_precision{2};
+  constexpr inline static u32 default_graph_width{50};
   std::optional<u32> precision;
+  std::optional<u32> graph_width;
   bool colorize{true};
   bool timing{true};
   bool part2{true};
   bool part1{true};
   bool answers{true};
   bool mask{false};
+  bool graphs{false};
   std::optional<u32> single{std::nullopt};
   std::optional<u32> benchmark{std::nullopt};
 

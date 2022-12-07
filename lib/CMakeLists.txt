@@ -3,6 +3,7 @@ add_library(lib)
 target_sources(lib
   PRIVATE
   file_backed_buffer.cpp
+  graph.cpp
   options.cpp
   table.cpp
 )
