@@ -26,7 +26,7 @@ print_plain(std::string v) noexcept {
   return fmt::styled(v, style);
 }
 
-template <fmt::color Color, fmt::emphasis... Emphs>
+template <fmt::detail::color_type Color, fmt::emphasis... Emphs>
 fmt::detail::styled_arg<std::string>
 print(std::string v) noexcept {
   fmt::text_style style{};
@@ -41,20 +41,20 @@ namespace colors {
 inline constexpr auto header_plain = &print_plain<fmt::emphasis::bold, fmt::emphasis::italic>;
 inline constexpr auto plain = &print_plain<>;
 
-inline constexpr auto red = &print<fmt::color::red>;
-inline constexpr auto yellow = &print<fmt::color::yellow>;
-inline constexpr auto green = &print<fmt::color::green>;
-inline constexpr auto cyan = &print<fmt::color::cyan>;
+inline constexpr auto red = &print<fmt::terminal_color::red>;
+inline constexpr auto yellow = &print<fmt::terminal_color::yellow>;
+inline constexpr auto green = &print<fmt::terminal_color::green>;
+inline constexpr auto cyan = &print<fmt::terminal_color::cyan>;
 
-inline constexpr auto bold_red = &print<fmt::color::red, fmt::emphasis::bold>;
-inline constexpr auto bold_yellow = &print<fmt::color::yellow, fmt::emphasis::bold>;
-inline constexpr auto bold_green = &print<fmt::color::green, fmt::emphasis::bold>;
-inline constexpr auto bold_cyan = &print<fmt::color::cyan, fmt::emphasis::bold>;
+inline constexpr auto bold_red = &print<fmt::terminal_color::red, fmt::emphasis::bold>;
+inline constexpr auto bold_yellow = &print<fmt::terminal_color::yellow, fmt::emphasis::bold>;
+inline constexpr auto bold_green = &print<fmt::terminal_color::green, fmt::emphasis::bold>;
+inline constexpr auto bold_cyan = &print<fmt::terminal_color::cyan, fmt::emphasis::bold>;
 
-inline constexpr auto faint_red = &print<fmt::color::red, fmt::emphasis::faint>;
-inline constexpr auto faint_green = &print<fmt::color::green, fmt::emphasis::faint>;
-inline constexpr auto faint_yellow = &print<fmt::color::yellow, fmt::emphasis::faint>;
-inline constexpr auto faint_cyan = &print<fmt::color::cyan, fmt::emphasis::faint>;
+inline constexpr auto faint_red = &print<fmt::terminal_color::red, fmt::emphasis::faint>;
+inline constexpr auto faint_green = &print<fmt::terminal_color::green, fmt::emphasis::faint>;
+inline constexpr auto faint_yellow = &print<fmt::terminal_color::yellow, fmt::emphasis::faint>;
+inline constexpr auto faint_cyan = &print<fmt::terminal_color::cyan, fmt::emphasis::faint>;
 
 } // namespace colors
 
