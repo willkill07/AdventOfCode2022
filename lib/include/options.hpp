@@ -11,19 +11,24 @@
 #include "types.hpp"
 
 struct run_options {
+  constexpr inline static u32 default_bar_width{8};
   constexpr inline static u32 default_precision{2};
   constexpr inline static u32 default_graph_width{50};
-  std::optional<u32> precision;
-  std::optional<u32> graph_width;
-  bool colorize{true};
+
+  std::optional<u32> precision{std::nullopt};
+  std::optional<u32> graph_width{std::nullopt};
+  std::optional<u32> single{std::nullopt};
+  std::optional<u32> benchmark{std::nullopt};
+  
   bool timing{true};
   bool part2{true};
   bool part1{true};
   bool answers{true};
   bool mask{false};
+  bool colorize{true};
   bool graphs{false};
-  std::optional<u32> single{std::nullopt};
-  std::optional<u32> benchmark{std::nullopt};
+  bool visual{false};
+
 
   [[nodiscard]] inline std::string format(std::integral auto value) const noexcept {
     return fmt::format("{0}", value);
@@ -53,6 +58,11 @@ struct run_options {
 
   [[nodiscard]] inline auto content_mask() const noexcept {
     return std::array{true, part1 and answers, part2 and answers, timing, part1 and timing, part2 and timing, timing};
+  }
+
+  [[nodiscard]] inline auto update_mask() const noexcept {
+    bool const show{timing and not visual};
+    return std::array{true, part1 and answers, part2 and answers, show, part1 and show, part2 and show, show};
   }
 
   [[nodiscard]] inline auto summary_mask() const noexcept {

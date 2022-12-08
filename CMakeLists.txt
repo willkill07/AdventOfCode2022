@@ -2,7 +2,14 @@ cmake_minimum_required(VERSION 3.20)
 project(AdventOfCode2022 CXX)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS On)
-set(CMAKE_BUILD_TYPE Release)
+
+if(DEBUG)
+  set(CMAKE_BUILD_TYPE Debug)
+  add_compile_options(-fsanitize=address -g)
+  add_link_options(-fsanitize=address -g)
+else()
+  set(CMAKE_BUILD_TYPE Release)
+endif()
 
 set(common_flags -Wall -Wextra -Wpedantic -Wconversion -Wuninitialized -Wshadow)
 if(NOT ${CMAKE_CXX_COMPILER_ID} MATCHES "AppleClang")

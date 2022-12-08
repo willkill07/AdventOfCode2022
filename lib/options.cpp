@@ -39,5 +39,9 @@ run_options::validate() const noexcept {
     fprintf(stderr, "Cannot specify execution of single day with graph output\n");
     valid = false;
   }
+  if (visual and single.has_value()) {
+    fprintf(stderr, "Cannot specify execution of single day with visual timing\n");
+    valid = false;
+  }
   return valid;
 }

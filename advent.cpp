@@ -8,6 +8,8 @@
 #include <doctest/doctest.h>
 #include <fmt/core.h>
 
+#include "chart/calculator.hpp"
+#include "chart/chart.hpp"
 #include "days/advent_days.hpp"
 #include "file_backed_buffer.hpp"
 #include "fixed_string.hpp"
@@ -61,15 +63,11 @@ run_one(report_data &data, report_timing &timing, run_options const &options) {
 
   timing_data curr{.parsing = time_in_us(t0, t1), .part1 = time_in_us(t1, t2), .part2 = time_in_us(t2, t3)};
   curr /= options.benchmark.value_or(1);
-  timing.push_back(curr);
+  timing[DayIdx] = curr;
 
-  data[DayIdx] = report_line{fmt::format("Day {:02}", CurrentDay::number),
-                             options.format_answer(part1_answer),
-                             options.format_answer(part2_answer),
-                             options.format(curr.parsing),
-                             options.format(curr.part1),
-                             options.format(curr.part2),
-                             options.format(curr.total())};
+  data[DayIdx][std::to_underlying(index::day)] = fmt::format("Day {:02}", CurrentDay::number);
+  data[DayIdx][std::to_underlying(index::part1_answer)] = options.format_answer(part1_answer);
+  data[DayIdx][std::to_underlying(index::part2_answer)] = options.format_answer(part2_answer);
 
   return curr;
 }
@@ -77,12 +75,39 @@ run_one(report_data &data, report_timing &timing, run_options const &options) {
 auto
 run(run_options const &options) noexcept {
   using Result = std::tuple<timing_data, report_timing, report_data>;
-  return fold<implemented_days>(
-      Result{timing_data{}, report_timing{}, implemented_days},
+  auto result = fold<implemented_days>(
+      Result{timing_data{}, implemented_days, implemented_days},
       []<usize Day>(Result &acc, constant_t<Day>, run_options const &opts) {
         std::get<timing_data>(acc) += run_one<Day>(std::get<report_data>(acc), std::get<report_timing>(acc), opts);
       },
       options);
+
+  report_timing &times = std::get<report_timing>(result);
+  report_data &data = std::get<report_data>(result);
+  if (options.visual) {
+    chart::calculator<double, 8> parse_time, part1_time, part2_time, total_time;
+    for (auto const& t : times) {
+      parse_time.add_sample(t.parsing);
+      part1_time.add_sample(t.part1);
+      part2_time.add_sample(t.part2);
+      total_time.add_sample(t.total());
+    }
+    auto const width = options.precision.value_or(run_options::default_bar_width);
+    for (usize i{0}; i < implemented_days; ++i) {
+      data[i][std::to_underlying(index::parse_time)] = chart::row(parse_time.length_for(times[i].parsing, width));
+      data[i][std::to_underlying(index::part1_time)] = chart::row(part1_time.length_for(times[i].part1, width));
+      data[i][std::to_underlying(index::part2_time)] = chart::row(part2_time.length_for(times[i].part2, width));
+      data[i][std::to_underlying(index::total_time)] = chart::row(total_time.length_for(times[i].total(), width));
+    }
+  } else {
+    for (usize i{0}; i < std::size(times); ++i) {
+      data[i][std::to_underlying(index::parse_time)] = options.format(times[i].parsing);
+      data[i][std::to_underlying(index::part1_time)] = options.format(times[i].part1);
+      data[i][std::to_underlying(index::part2_time)] = options.format(times[i].part2);
+      data[i][std::to_underlying(index::total_time)] = options.format(times[i].total());
+    }
+  }
+  return result;
 }
 
 int
@@ -92,7 +117,7 @@ main(int argc, char **argv) {
   bool error{false};
 
   while (true) {
-    switch (int const curr_opt{getopt(argc, argv, "htg12TCNMd:p:b:w:")}; curr_opt) {
+    switch (int const curr_opt{getopt(argc, argv, "htgv12TCNMd:p:b:w:")}; curr_opt) {
     case 't':
       return doctest::Context{argc, argv}.run();
       break;
@@ -139,6 +164,9 @@ main(int argc, char **argv) {
       }
       break;
     }
+    case 'v':
+      options.visual = true;
+      break;
     case 'g':
       options.graphs = true;
       break;
@@ -191,12 +219,16 @@ Usage: {} [-h|-t|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_nu
     -C             suppress color output
     -M             mask answers
     -p <prec={}>    precision of timing output
+                   for visual mode, this is the bar width (={})
     -b <times>     benchmark run repetition amount
+    -v             show bars instead of numbers for timing
     -g             show graphs
-    -w <width>     width of graphs
+    -w <width={}>  width of graphs
 )AOC_HELP",
                argv[0],
-               run_options::default_precision);
+               run_options::default_precision,
+               run_options::default_bar_width,
+               run_options::default_graph_width);
     return (error ? EXIT_FAILURE : EXIT_SUCCESS);
   }
 

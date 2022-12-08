@@ -27,12 +27,18 @@ public:
   }
 
   length_result<Parts> length_for(T value, unsigned width) {
-    value = std::clamp(value, T{0}, max_value);
-    double const scaled{static_cast<double>(width) * (static_cast<double>(value) / max_value)};
-    unsigned const whole{static_cast<unsigned>(std::max({0.0, scaled - 1}))};
-    unsigned const remainder{static_cast<unsigned>((scaled - whole) * Parts)};
-    unsigned const spacing{static_cast<unsigned>(width - (whole + 1))};
-    return {whole, remainder % Parts, spacing};
+    unsigned const segments = width * Parts;
+    unsigned const percentage = static_cast<unsigned>(segments * (static_cast<double>(value) / static_cast<double>(max_value)));
+    unsigned const whole = percentage / Parts;
+    unsigned const partial = 1 + percentage % Parts;
+    if (whole == width) {
+      return {whole, 0, 0};
+    }
+    if (whole == 0 and partial == 0) {
+      return {0, 1, width - 1};
+    }
+    width -= whole + 1;
+    return {whole, partial, width};
   }
 };
 

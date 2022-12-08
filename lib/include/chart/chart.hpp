@@ -18,8 +18,8 @@ struct printable {
   static constexpr std::size_t const width = parts.size();
 };
 
-using horizontal = printable<"█", "▏▎▍▌▋▊▉█">;
-using vertical = printable<"█", "▁▂▃▄▅▆▇█">;
+using horizontal = printable<"█", " ▏▎▍▌▋▊▉█">;
+using vertical = printable<"█", " ▁▂▃▄▅▆▇█">;
 
 } // namespace detail
 
@@ -31,12 +31,12 @@ std::string
 row(length_result<Parts> res) {
   using Chars = characters_for<orientation::horizontal>;
   std::string result;
-  if (res.whole_count) {
-    for (unsigned i{0}; i < res.whole_count; ++i) {
-      result.append(Chars::whole);
-    }
+  for (unsigned i{0}; i < res.whole_count; ++i) {
+    result.append(Chars::whole);
   }
-  result.append(Chars::parts[res.part]);
+  if (res.part > 0) {
+    result.append(Chars::parts[res.part]);
+  }
   result.append(res.spacing, ' ');
   return result;
 }

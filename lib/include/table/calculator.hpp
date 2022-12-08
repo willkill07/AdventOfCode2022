@@ -44,29 +44,33 @@ public:
   }
 
   template <usize CurrLen, usize Offset>
-  inline column_state get_column() noexcept {
+  inline column_state get_column(std::array<bool, Columns> mask_override = all<Columns>(true)) noexcept {
     return fold<CurrLen>(
         column_state{},
-        []<usize I>(column_state &state, constant_t<I>, width_calculator<Columns> &self) {
-          if (self.mask[I + Offset]) {
+        []<usize I>(column_state &state, constant_t<I>, width_calculator<Columns> &self, auto& m) {
+          if (self.mask[I + Offset] and m[I + Offset]) {
             state.add(self.total[I + Offset]);
           }
         },
-        *this);
+        *this,
+        mask_override);
   }
 
-private:
-public:
   template <std::array Array, typename T, usize N = Array.size()>
-  void update(std::array<T, N> const &col_vals) noexcept requires std::constructible_from<std::string_view, T> {
+  void update(std::array<T, N> const &col_vals, std::array<bool, Columns> col_update_mask = all<Columns>(true)) noexcept
+    requires std::constructible_from<std::string_view, T>
+  {
     static_assert(sum(Array) == Columns, "Invalid grouping array specified");
     static constexpr std::array Offsets{exclusive_scan(Array)};
     // walk through each "size" in grouping array
     // need this to be compile-time for the call to get_column below
     static_for<N>(
-        []<usize Idx>(constant_t<Idx>, width_calculator<Columns> &self, auto const &cv) {
+        []<usize Idx>(constant_t<Idx>, width_calculator<Columns> &self, auto const &cv, auto const &update_mask) {
           constexpr usize const CurrLen{Array[Idx]};
-          column_state const col{self.get_column<CurrLen, Offsets[Idx]>()};
+          column_state const col{self.get_column<CurrLen, Offsets[Idx]>(update_mask)};
+          if (col.count == 0) {
+            return;
+          }
           usize const required{std::size(std::string_view{cv[Idx]})};
           usize const current{col.real_width()};
           // if we need to expand
@@ -82,7 +86,8 @@ public:
           }
         },
         *this,
-        col_vals);
+        col_vals,
+        col_update_mask);
   }
 
   template <std::array Array, usize N = Array.size()>
@@ -96,6 +101,12 @@ public:
         },
         *this,
         curr_mask);
+  }
+
+  void ensure_at_least(std::array<usize, Columns> const &vals) noexcept {
+    for (usize i{0}; i < Columns; ++i) {
+      total[i] = std::max(total[i], vals[i]);
+    }
   }
 };
 

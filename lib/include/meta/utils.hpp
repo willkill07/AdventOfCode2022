@@ -4,6 +4,16 @@
 #include <array>
 #include <numeric>
 
+
+
+template <size_t N, typename T>
+constexpr auto
+all (T val) noexcept {
+  std::array<T, N> res;
+  res.fill(val);
+  return res;
+}
+
 consteval bool
 implies(bool a, bool b) {
   return !a or b;
