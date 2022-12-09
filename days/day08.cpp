@@ -26,25 +26,33 @@ PARSE_IMPL(Day08, view) {
     for (usize i{0}; i < dim; ++i) {
       if (auto const val = grid[j][i]; val > lmax) {
         ++vis(j, i);
-        lmax = val;
+        if (lmax = val; val == '9') {
+          break;
+        }
       }
     }
     for (usize i{0}; i < dim; ++i) {
       if (auto const val = grid[j][end - i]; val > rmax) {
         ++vis(j, end - i);
-        rmax = val;
+        if (rmax = val; val == '9') {
+          break;
+        }
       }
     }
     for (usize i{0}; i < dim; ++i) {
       if (auto const val = grid[i][j]; val > tmax) {
         ++vis(i, j);
-        tmax = val;
+        if (tmax = val; val == '9') {
+          break;
+        }
       }
     }
     for (usize i{0}; i < dim; ++i) {
       if (auto val = grid[end - i][j]; val > bmax) {
         ++vis(end - i, j);
-        bmax = val;
+        if (bmax = val; val == '9') {
+          break;
+        }
       }
     }
   }
@@ -52,7 +60,7 @@ PARSE_IMPL(Day08, view) {
 }
 
 PART1_IMPL(Day08, data) {
-  
+
   return std::count_if(std::begin(data.visible), std::end(data.visible), [](unsigned c) {
     return c > 0;
   });
