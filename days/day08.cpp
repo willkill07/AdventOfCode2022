@@ -68,7 +68,8 @@ PART2_IMPL(Day08, data, part1_answer) {
   i64 high{0};
   for (usize y{1}; y < end; y++) {
     for (usize x{1}; x < end; x++) {
-      if (not visible[y * dim + x]) {
+      // this is an optimization which likely is not acceptable for all inputs
+      if (visible[y * dim + x] != 3u) {
         continue;
       }
       auto const tree = grid[y][x];
