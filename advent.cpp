@@ -6,6 +6,8 @@
 #include <unistd.h>
 
 #include <doctest/doctest.h>
+#include <fmt/chrono.h>
+#include <fmt/compile.h>
 #include <fmt/core.h>
 
 #include "chart/calculator.hpp"
@@ -29,7 +31,7 @@ run_one(report_data &data, report_timing &timing, run_options const &options) {
     return {};
   }
 
-  file_backed_buffer buffer{fmt::format("input/day{:02}.txt", CurrentDay::number)};
+  file_backed_buffer buffer{fmt::format(FMT_COMPILE("input/day{:02}.txt"), CurrentDay::number)};
   if (not buffer) {
     return {};
   }
@@ -65,7 +67,7 @@ run_one(report_data &data, report_timing &timing, run_options const &options) {
   curr /= options.benchmark.value_or(1);
   timing[DayIdx] = curr;
 
-  data[DayIdx][std::to_underlying(index::day)] = fmt::format("Day {:02}", CurrentDay::number);
+  data[DayIdx][std::to_underlying(index::day)] = fmt::format(FMT_COMPILE("Day {:02}"), CurrentDay::number);
   data[DayIdx][std::to_underlying(index::part1_answer)] = options.format_answer(part1_answer);
   data[DayIdx][std::to_underlying(index::part2_answer)] = options.format_answer(part2_answer);
 
@@ -86,7 +88,7 @@ run(run_options const &options) noexcept {
   report_data &data = std::get<report_data>(result);
   if (options.visual) {
     chart::calculator<double, 8> parse_time, part1_time, part2_time, total_time;
-    for (auto const& t : times) {
+    for (auto const &t : times) {
       parse_time.add_sample(t.parsing);
       part1_time.add_sample(t.part1);
       part2_time.add_sample(t.part2);
@@ -110,6 +112,20 @@ run(run_options const &options) noexcept {
   return result;
 }
 
+void
+minimal_run() {
+  time_point start{clock_type::now()};
+  static_for<implemented_days>([&]<usize DayId>(constant_t<DayId>) {
+    using CurrentDay = std::tuple_element_t<DayId, all_days>;
+    CurrentDay day;
+    file_backed_buffer buffer{fmt::format(FMT_COMPILE("input/day{:02}.txt"), CurrentDay::number)};
+    auto const parsed = day.parse_input(buffer.get_string_view());
+    auto const part1 = day.part1(parsed);
+    (void)day.part2(parsed, part1);
+  });
+  fmt::print(FMT_COMPILE("{}\n"), (clock_type::now() - start));
+}
+
 int
 main(int argc, char **argv) {
   run_options options{};
@@ -117,7 +133,7 @@ main(int argc, char **argv) {
   bool error{false};
 
   while (true) {
-    switch (int const curr_opt{getopt(argc, argv, "htgv12TCNMd:p:b:w:")}; curr_opt) {
+    switch (int const curr_opt{getopt(argc, argv, "mhtgv12TCNMd:p:b:w:")}; curr_opt) {
     case 't':
       return doctest::Context{argc, argv}.run();
       break;
@@ -164,6 +180,9 @@ main(int argc, char **argv) {
       }
       break;
     }
+    case 'm':
+      minimal_run();
+      exit(0);
     case 'v':
       options.visual = true;
       break;
@@ -201,7 +220,7 @@ option_parsing_done:
   error = error or not options.validate();
 
   if (help or error) {
-    fmt::print(R"AOC_HELP(
+    fmt::print(FMT_COMPILE(R"AOC_HELP(
 Advent of Code 2022 (in Modern C++)
 (c) 2022 William Killian
 
@@ -224,7 +243,8 @@ Usage: {} [-h|-t|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_nu
     -v             show bars instead of numbers for timing
     -g             show graphs
     -w <width={}>  width of graphs
-)AOC_HELP",
+    -m             minimal run -- no output and fewest checks (runs all days)
+)AOC_HELP"),
                argv[0],
                run_options::default_precision,
                run_options::default_bar_width,

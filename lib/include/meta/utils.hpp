@@ -34,20 +34,20 @@ exclusive_scan(std::array<T, N> const &arr) noexcept {
 }
 
 template <auto N, typename Fn, typename... Args>
-void
+[[gnu::always_inline]] void
 static_for(Fn &&body, Args &&...args) noexcept {
   using T = decltype(N);
-  []<T... Is>(std::integer_sequence<T, Is...>, Fn && f, Args && ...a) {
+  []<T... Is>(std::integer_sequence<T, Is...>, Fn && f, Args && ...a) __attribute__((always_inline)) {
     (f(std::integral_constant<T, Is>{}, std::forward<Args>(a)...), ...);
   }
   (std::make_integer_sequence<T, N>{}, std::forward<Fn>(body), std::forward<Args>(args)...);
 }
 
 template <auto N, typename Init, typename Fn, typename... Args>
-auto
-fold(Init init, Fn &&body, Args &&...args) noexcept {
+[[gnu::always_inline]] auto
+fold(Init&& init, Fn &&body, Args &&...args) noexcept {
   using T = decltype(N);
-  return []<T... Is>(std::integer_sequence<T, Is...>, Init & acc, Fn && f, Args && ...a) {
+  return []<T... Is>(std::integer_sequence<T, Is...>, Init & acc, Fn && f, Args && ...a) __attribute__((always_inline)) {
     (f(acc, std::integral_constant<T, Is>{}, std::forward<Args>(a)...), ...);
     return acc;
   }
