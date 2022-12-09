@@ -56,6 +56,10 @@ struct point2d {
     return point2d{x / v, y / v};
   }
 
+  constexpr inline point2d sgn() const noexcept {
+    return point2d{(x > 0) - (x < 0), (y > 0) - (y < 0)};
+  }
+
   friend constexpr inline auto operator<=>(point2d const &, point2d const &) = default;
 
   constexpr usize hash() const noexcept {

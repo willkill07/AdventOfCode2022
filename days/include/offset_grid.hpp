@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "point2d.hpp"
 #include "types.hpp"
 
 template <typename T>
@@ -31,6 +32,14 @@ struct offset_grid {
 
   const_reference operator()(i32 x, i32 y) const noexcept {
     return m_data[static_cast<usize>(width * (y - miny) + (x - minx))];
+  }
+
+  reference operator()(point2d const& p) noexcept {
+    return (*this)(p.x, p.y);
+  }
+
+  const_reference operator()(point2d const& p) const noexcept {
+    return (*this)(p.x, p.y);
   }
 
   constexpr iterator begin() {

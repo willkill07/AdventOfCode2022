@@ -4,16 +4,12 @@
 #include "parsing.hpp"
 #include "point2d.hpp"
 
-constexpr inline i32
-norm(i32 val) {
-  return (val > 0) - (val < 0);
-}
-
 constexpr usize const tracked_p1 = 1;
 constexpr usize const tracked_p2 = 9;
 constexpr usize const max_tracked = std::max(tracked_p1, tracked_p2);
 
 PARSE_IMPL(Day09, view) {
+
   // keep track of a bounding box
   i32 x_min{0}, x_max{0}, y_min{0}, y_max{0};
   point2d location = point2d::origin();
@@ -51,8 +47,8 @@ PARSE_IMPL(Day09, view) {
   // a visited grid is faster than std::unordered_set
   offset_grid<u16> grid(x_min, x_max, y_min, y_max);
 
-  // have all 10 links visit the origin
-  grid(0, 0) = ((1 << (max_tracked + 1)) - 1);
+  // visit the origin
+  grid(0, 0) = (1 << tracked_p1) | (1 << tracked_p2);
 
   // make the chain of size 10
   std::array<point2d, 1 + max_tracked> chain;
@@ -65,11 +61,11 @@ PARSE_IMPL(Day09, view) {
         point2d &curr = chain[k];
         point2d const delta{chain[k - 1] - curr};
         // prev has moved too far and need to adjust
-        if (std::abs(delta.x) > 1 or std::abs(delta.y) > 1) {
-          curr += point2d{norm(delta.x), norm(delta.y)};
+        if (std::abs(delta.y) > 1 or std::abs(delta.x) > 1) {
+          curr += delta.sgn();
           // mark the location as visited only if interesting
           if (k == tracked_p1 or k == tracked_p2) {
-            grid(curr.x, curr.y) |= (1 << k);
+            grid(curr) |= (1 << k);
           }
           continue;
         }
