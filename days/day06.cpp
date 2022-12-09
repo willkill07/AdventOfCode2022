@@ -8,8 +8,8 @@
 #include "parsing.hpp"
 
 PARSE_IMPL(Day06, view) {
-  std::vector<i8> mapped(std::size(view));
-  std::transform(std::begin(view), std::end(view), std::begin(mapped), [](char c) {
+  std::vector<i8> mapped(std::size(view) - 1);
+  std::transform(std::begin(view), std::end(view) - 1, std::begin(mapped), [](char c) {
     return c - 'a';
   });
   return mapped;
