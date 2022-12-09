@@ -113,7 +113,7 @@ run(run_options const &options) noexcept {
 }
 
 void
-minimal_run() {
+minimal_run(bool quiet) {
   time_point start{clock_type::now()};
   static_for<implemented_days>([&]<usize DayId>(constant_t<DayId>) {
     using CurrentDay = std::tuple_element_t<DayId, all_days>;
@@ -123,7 +123,9 @@ minimal_run() {
     auto const part1 = day.part1(parsed);
     (void)day.part2(parsed, part1);
   });
-  fmt::print(FMT_COMPILE("{}\n"), (clock_type::now() - start));
+  if (not quiet) {
+    fmt::print(FMT_COMPILE("{}\n"), (clock_type::now() - start));
+  }
 }
 
 int
@@ -131,9 +133,10 @@ main(int argc, char **argv) {
   run_options options{};
   bool help{false};
   bool error{false};
+  bool quiet{true};
 
   while (true) {
-    switch (int const curr_opt{getopt(argc, argv, "mhtgv12TCNMd:p:b:w:")}; curr_opt) {
+    switch (int const curr_opt{getopt(argc, argv, "Qmhtgv12TCNMd:p:b:w:")}; curr_opt) {
     case 't':
       return doctest::Context{argc, argv}.run();
       break;
@@ -180,8 +183,11 @@ main(int argc, char **argv) {
       }
       break;
     }
+    case 'Q':
+      quiet = false;
+      break;
     case 'm':
-      minimal_run();
+      minimal_run(quiet);
       exit(0);
     case 'v':
       options.visual = true;
@@ -224,26 +230,31 @@ option_parsing_done:
 Advent of Code 2022 (in Modern C++)
 (c) 2022 William Killian
 
-Usage: {} [-h|-t|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_num>| -g [-w <num>]]]
+Usage: {} [-h|-t|[-Q] -m|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_num>| -g [-w <num>]]]
 
     -h             show help
     -t             run tests and exit
                    when specified first, other command-line args will be forwarded
                    automatically to doctest (invoke with --help to see options)
+
+    -m             minimal run
+    -Q             noisy mode for minimal run
+
+    -b <times>     benchmark run repetition amount
     -d <day_num>   run single day
     -1             only show and run part 1
     -2             only show part 2
+
     -T             suppress timing
     -N             suppress answers
-    -C             suppress color output
     -M             mask answers
+    
+    -C             suppress color output
+    -v             visual mode (show bars instead of numbers for timing)
     -p <prec={}>    precision of timing output
                    for visual mode, this is the bar width (={})
-    -b <times>     benchmark run repetition amount
-    -v             show bars instead of numbers for timing
     -g             show graphs
     -w <width={}>  width of graphs
-    -m             minimal run -- no output and fewest checks (runs all days)
 )AOC_HELP"),
                argv[0],
                run_options::default_precision,
