@@ -6,7 +6,7 @@
 
 constexpr inline i32
 norm(i32 val) {
-  return (val == 0 ? 0 : (val < 0 ? -1 : 1));
+  return (val > 0) - (val < 0);
 }
 
 constexpr usize const tracked_p1 = 1;
@@ -62,7 +62,7 @@ PARSE_IMPL(Day09, view) {
       chain[0] += dir;
       // always simulate chain of size 10
       for (usize k{1}; k <= max_tracked; ++k) {
-        point2d& curr = chain[k];
+        point2d &curr = chain[k];
         point2d const delta{chain[k - 1] - curr};
         // prev has moved too far and need to adjust
         if (std::abs(delta.x) > 1 or std::abs(delta.y) > 1) {
@@ -71,13 +71,13 @@ PARSE_IMPL(Day09, view) {
           if (k == tracked_p1 or k == tracked_p2) {
             grid(curr.x, curr.y) |= (1 << k);
           }
-        } else {
-          break;
+          continue;
         }
+        break;
       }
     }
   }
-
+  
   return grid;
 }
 

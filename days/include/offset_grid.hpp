@@ -4,10 +4,6 @@
 
 #include "types.hpp"
 
-struct bounding_box {
-  i32 x_min, x_max, y_min, y_max;
-};
-
 template <typename T>
 struct offset_grid {
 
@@ -20,11 +16,7 @@ struct offset_grid {
   using value_type = typename std::vector<T>::value_type;
 
   offset_grid() = delete;
-
-  constexpr offset_grid(bounding_box const &b)
-      : offset_grid(b.x_min, b.x_max, b.y_min, b.y_max) {
-  }
-
+  
   constexpr offset_grid(i32 x_min, i32 x_max, i32 y_min, i32 y_max)
       : width{x_max - x_min + 1},
         height{y_max - y_min + 1},
