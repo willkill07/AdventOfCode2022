@@ -9,6 +9,7 @@ target_sources(days
   day06.cpp
   day07.cpp
   day08.cpp
+  day09.cpp
 )
 
 target_include_directories(days PUBLIC include)
