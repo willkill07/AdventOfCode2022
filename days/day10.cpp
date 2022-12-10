@@ -6,15 +6,15 @@
 #include "parsing.hpp"
 
 PARSE_IMPL(Day10, view) {
-  std::vector<i32> values;
-  values.reserve(2u * static_cast<u32>(std::count(std::begin(view), std::end(view), '\n')));
+  std::array<i8, 240> values;
+  u32 idx{0};
   for (usize off{0}; off < std::size(view);) {
-    values.push_back(0);
+    values[idx++] = 0;
     if (view[off] == 'a') {
       off += 5;
       i32 value;
       off += parse<"\0\n">(view.substr(off), value);
-      values.push_back(value);
+      values[idx++] = static_cast<i8>(value);
     } else {
       off += 5;
     }
@@ -37,6 +37,12 @@ PART1_IMPL(Day10, diff) {
   return score;
 }
 
+namespace {
+// we know the output is going to be 8 chars always
+// use a static buffer for this and always return the address
+std::array<char, 8> screen;
+}
+
 PART2_IMPL(Day10, diff, part1_answer) {
   std::array<letter, 8> letters;
   i32 valX{1};
@@ -51,11 +57,11 @@ PART2_IMPL(Day10, diff, part1_answer) {
       }
     }
   }
-  std::string screen(8, ' ');
+  screen.fill(0);
   for (u32 i{0}; i < 8u; ++i) {
     screen[i] = letters[i].as<char>();
   }
-  return screen;
+  return {screen.data(), screen.size()};
 }
 
 INSTANTIATE_TEST(Day10,
