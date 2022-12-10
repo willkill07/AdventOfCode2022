@@ -44,11 +44,10 @@ struct run_options {
 
   template <typename T>
   [[nodiscard]] inline std::string format_answer(T &&value) const noexcept {
-    if (std::string result{format(std::forward<T>(value))}; mask) {
-      std::fill(std::begin(result), std::end(result), 'X');
-      return result;
+    if (mask) {
+      return std::string(fmt::formatted_size("{}", std::forward<T>(value)), 'X');
     } else {
-      return result;
+      return format(std::forward<T>(value));
     }
   }
 

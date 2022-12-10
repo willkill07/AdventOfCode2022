@@ -10,6 +10,16 @@
 #include "fixed_string.hpp"
 #include "meta/utils.hpp"
 
+constexpr inline std::string_view
+unsafe_substr(std::string_view str, std::unsigned_integral auto offset) noexcept {
+  return {str.data() + offset, str.size() - offset};
+}
+
+constexpr inline std::string_view
+unsafe_substr(std::string_view str, std::unsigned_integral auto offset, std::unsigned_integral auto len) noexcept {
+  return {str.data() + offset, len};
+}
+
 template <typename T>
 T parse(std::string_view) noexcept;
 
@@ -48,36 +58,9 @@ parse(std::string_view s) noexcept requires (not std::same_as<T, char>) {
     return {};
   } else {
     bool const neg{s.front() == '-'};
-    T const value{static_cast<T>(parse<std::make_unsigned_t<T>>(s.substr(static_cast<std::size_t>(neg))))};
+    T const value{static_cast<T>(parse<std::make_unsigned_t<T>>(unsafe_substr(s, static_cast<std::size_t>(neg))))};
     return neg ? -value : value;
   }
-}
-
-template <std::floating_point T>
-[[gnu::always_inline, gnu::flatten, nodiscard]] inline T
-parse(std::string_view s) noexcept {
-  bool neg{s.front() == '-'};
-  if (neg) {
-    s = s.substr(1);
-  }
-  double whole{0};
-  while (not s.empty() and s[0] != '.') {
-    whole = whole * 10 + (s[0] - '0');
-    s = s.substr(1);
-  }
-  if (s.empty()) {
-    return static_cast<T>(whole);
-  }
-  // skip dot
-  s = s.substr(1);
-  double frac{0};
-  double div{0};
-  while (not s.empty()) {
-    frac = frac * 10 + (s[0] - '0');
-    div *= 10;
-    s = s.substr(1);
-  }
-  return whole + (frac / div);
 }
 
 template <fixed_string FormatStr, typename... Ts>
@@ -98,9 +81,9 @@ parse(std::string_view view, Ts &...vals) noexcept {
           static_assert(not is_placeholder_char(NextChar, Elems), "Two placeholders must not be adjacent");
           using T = std::tuple_element_t<CurrChar, Types>;
           // calculate length of string_view matching criteria
-          std::size_t const len = v.substr(off).find_first_of(NextChar);
+          std::size_t const len = v.find_first_of(NextChar, off) - off;
           // update reference with parsed value
-          std::get<CurrChar>(vs) = parse<T>(v.substr(off, len));
+          std::get<CurrChar>(vs) = parse<T>(unsafe_substr(v, off, len));
           // consume the char after the placeholder too
           off += len;
         } else if constexpr (CurrIndex > 0) {

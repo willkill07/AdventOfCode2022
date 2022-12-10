@@ -37,39 +37,53 @@ run_one(report_data &data, report_timing &timing, run_options const &options) {
   }
 
   CurrentDay day;
-  time_point t0 = clock_type::now();
-  auto repeat = [&](auto &&fn, auto &&...args) {
-    for (u32 rep{1}; rep < options.benchmark.value_or(1); ++rep) {
-      (void)fn(std::forward<decltype(args)>(args)...);
-    }
-    return fn(std::forward<decltype(args)>(args)...);
-  };
-  auto const parsed = repeat([&] {
-    return day.parse_input(buffer.get_string_view());
-  });
-  time_point t1 = clock_type::now();
-  auto const part1_answer = repeat([&] {
-    return day.part1(parsed);
-  });
-  time_point t2 = clock_type::now();
-  auto const part2_answer = [&]() -> typename CurrentDay::part2_result_t {
-    if (options.part2) {
-      return repeat([&] {
-        return day.part2(parsed, part1_answer);
-      });
-    } else {
-      return {};
-    }
-  }();
-  time_point t3 = clock_type::now();
+  u32 const repetitions = options.benchmark.value_or(1);
+  std::string_view const view = buffer.get_string_view();
 
-  timing_data curr{.parsing = time_in_us(t0, t1), .part1 = time_in_us(t1, t2), .part2 = time_in_us(t2, t3)};
-  curr /= options.benchmark.value_or(1);
-  timing[DayIdx] = curr;
+  timing_data curr;
+
+  time_point t0 = clock_type::now();
+
+  for (u32 rep{1}; rep < repetitions; ++rep) {
+    (void)day.parse_input(view);
+  }
+  auto parsed = day.parse_input(view);
+  
+  time_point t1 = clock_type::now();
+  
+  if (options.part1) { 
+    for (u32 rep{1}; rep < repetitions; ++rep) {
+      (void)day.part1(parsed);
+    }
+  }
+  auto const part1_answer = day.part1(parsed);
+  
+  time_point t2 = clock_type::now();
+  
+  if (options.part2) {
+    for (u32 rep{1}; rep < repetitions; ++rep) {
+      (void)day.part2(parsed, part1_answer);
+    }
+    auto const part2_answer = day.part2(parsed, part1_answer);
+
+    time_point t3 = clock_type::now();
+    if (options.answers) {
+      data[DayIdx][std::to_underlying(index::part2_answer)] = options.format_answer(part2_answer);
+    }
+    curr.part2 = time_in_us(t2, t3);
+  }
 
   data[DayIdx][std::to_underlying(index::day)] = fmt::format(FMT_COMPILE("Day {:02}"), CurrentDay::number);
-  data[DayIdx][std::to_underlying(index::part1_answer)] = options.format_answer(part1_answer);
-  data[DayIdx][std::to_underlying(index::part2_answer)] = options.format_answer(part2_answer);
+  if (options.answers and options.part1) {
+    data[DayIdx][std::to_underlying(index::part1_answer)] = options.format_answer(part1_answer);
+  }
+
+  if (options.timing) {
+    curr.parsing = time_in_us(t0, t1);
+    curr.part1 = time_in_us(t1, t2);
+    curr /= options.benchmark.value_or(1);
+    timing[DayIdx] = curr;
+  }
 
   return curr;
 }
