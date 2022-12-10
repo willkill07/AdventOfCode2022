@@ -12,7 +12,8 @@
 #include "days/day07.hpp"
 #include "days/day08.hpp"
 #include "days/day09.hpp"
+#include "days/day10.hpp"
 
-using all_days = std::tuple<Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08, Day09>;
+using all_days = std::tuple<Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08, Day09, Day10>;
 
 constexpr inline static usize const implemented_days = std::tuple_size_v<all_days>;
