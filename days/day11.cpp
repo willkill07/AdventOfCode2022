@@ -5,8 +5,7 @@
 #include "parsing.hpp"
 
 PARSE_IMPL(Day11, view) {
-  using T = u64;
-  std::array<day11::monkey<T>, day11::MAX_MONKEYS> monkeys;
+  std::array<day11::monkey, day11::MAX_MONKEYS> monkeys;
 
   u32 num_monkeys{0};
   usize off{0};
@@ -16,7 +15,7 @@ PARSE_IMPL(Day11, view) {
     // advance to "Starting items: "
     off = view.find_first_of(':', off) + 2;
 
-    std::array<T, 40> values;
+    std::array<u32, 40> values;
     u32 num_items{0};
     // we have a value!
     while (view[off] != ' ') {
@@ -31,16 +30,23 @@ PARSE_IMPL(Day11, view) {
     // advance to number
     off += 2;
     // get rhs of op -- default to lhs == rhs
-    T rhs{0};
+    u32 rhs{0};
     if (view[off] != 'o') {
       // lhs != rhs -- parse
       off += parse<"\0\n">(view.substr(off), rhs);
     }
-    day11::operation<T> op{rhs, (op_char == '+' ? day11::op::plus : day11::op::multiplies)};
+    day11::operation op;
+    if (op_char == '+') {
+      op = day11::operation::add(rhs);
+    } else if (rhs == 0) {
+      op = day11::operation::power();
+    } else {
+      op = day11::operation::mul(rhs);
+    }
 
     // advance to " Test: divisible by "
     off = view.find_first_of('y', off) + 2;
-    T div;
+    u32 div;
     off += parse<"\0\n">(view.substr(off), div);
     off = view.find_first_of('y', off) + 2;
     u32 if_true = static_cast<u32>(view[off] - '0');
@@ -48,23 +54,26 @@ PARSE_IMPL(Day11, view) {
     u32 if_false = static_cast<u32>(view[off] - '0');
     off += 3;
 
-    day11::test<T> test{div, if_true, if_false};
-
-    monkeys[num_monkeys++] = day11::monkey<T>(std::move(values), num_items, op, test);
+    monkeys[num_monkeys++] = day11::monkey(std::move(values), num_items, op, div, if_true, if_false);
   }
 
   return day11::result_type{std::move(monkeys), num_monkeys};
 }
 
 SOLVE_IMPL(Day11, Part2, monkeys, part1_answer) {
-  auto working_monkeys = monkeys.max_monkeys;
-  auto const count = monkeys.num_monkeys;
+  auto working_monkeys = monkeys.monkey_buffer;
+  u32 const count = monkeys.monkey_len;
   std::span all_monkeys(working_monkeys.data(), count);
 
   constexpr u32 round_limit{Part2 ? 10'000u : 20u};
   for (u32 round{0}; round < round_limit; ++round) {
     for (auto &monkey : all_monkeys) {
-      monkey.throw_items<Part2>(all_monkeys);
+      for (u32 item : monkey.items()) {
+        u32 const worry_level{monkey.get_op().new_worry_level<Part2>(item)};
+        u32 const destination = monkey.get_destination(worry_level);
+        all_monkeys[destination].catch_item(worry_level);
+      }
+      monkey.update_throws();
     }
   }
 
