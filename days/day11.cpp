@@ -36,7 +36,7 @@ PARSE_IMPL(Day11, view) {
       // lhs != rhs -- parse
       off += parse<"\0\n">(view.substr(off), rhs);
     }
-    day11::operation<T> op{rhs, static_cast<day11::op>(op_char)};
+    day11::operation<T> op{rhs, (op_char == '+' ? day11::op::plus : day11::op::multiplies)};
 
     // advance to " Test: divisible by "
     off = view.find_first_of('y', off) + 2;
@@ -111,5 +111,5 @@ Monkey 3:
     If true: throw to monkey 0
     If false: throw to monkey 1
 )"sv.substr(1),
-                 10605,
-                 0)
+                 10605lu,
+                 2713310158lu)

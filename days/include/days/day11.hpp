@@ -10,37 +10,12 @@ constexpr static inline u32 MAX_MONKEYS = 8;
 constexpr static inline u32 MAX_ITEMS = 40;
 
 template <auto Mod, typename T>
-constexpr inline bool
+[[gnu::always_inline]] constexpr inline bool
 fast_evenly_divisible(T value) noexcept {
   return (value % Mod) == 0;
 }
 
-static constexpr std::array<bool (*)(u64) noexcept, 24> mod_lookup{{nullptr,
-                                                                    nullptr,
-                                                                    &fast_evenly_divisible<2>,
-                                                                    &fast_evenly_divisible<3>,
-                                                                    nullptr,
-                                                                    &fast_evenly_divisible<5>,
-                                                                    nullptr,
-                                                                    &fast_evenly_divisible<7>,
-                                                                    nullptr,
-                                                                    nullptr,
-                                                                    nullptr,
-                                                                    &fast_evenly_divisible<11>,
-                                                                    nullptr,
-                                                                    &fast_evenly_divisible<13>,
-                                                                    nullptr,
-                                                                    nullptr,
-                                                                    nullptr,
-                                                                    &fast_evenly_divisible<17>,
-                                                                    nullptr,
-                                                                    &fast_evenly_divisible<19>,
-                                                                    nullptr,
-                                                                    nullptr,
-                                                                    nullptr,
-                                                                    &fast_evenly_divisible<23>}};
-
-enum class op { plus = '+', multiplies = '*' };
+enum class op { plus, multiplies };
 
 template <typename T>
 class operation {
@@ -63,7 +38,7 @@ public:
     switch (m_op) {
     case op::plus:
       return lhs + rhs;
-    case op::multiplies:
+    default:
       return lhs * rhs;
     }
   }
@@ -85,7 +60,29 @@ public:
   }
 
   [[nodiscard]] constexpr inline u32 evaluate(T value) const noexcept {
-    return mod_lookup[div](value) ? if_true : if_false;
+    bool const cond = [](T v, u64 d) noexcept {
+      switch (d) {
+      case 3:
+        return fast_evenly_divisible<3>(v);
+      case 5:
+        return fast_evenly_divisible<5>(v);
+      case 7:
+        return fast_evenly_divisible<7>(v);
+      case 11:
+        return fast_evenly_divisible<11>(v);
+      case 13:
+        return fast_evenly_divisible<13>(v);
+      case 17:
+        return fast_evenly_divisible<17>(v);
+      case 19:
+        return fast_evenly_divisible<19>(v);
+      case 23:
+        return fast_evenly_divisible<23>(v);
+      default:
+        return fast_evenly_divisible<2>(v);
+      }
+    }(value, div);
+    return cond ? if_true : if_false;
   }
 };
 

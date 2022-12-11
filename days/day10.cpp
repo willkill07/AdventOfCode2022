@@ -6,54 +6,42 @@
 #include "parsing.hpp"
 
 PARSE_IMPL(Day10, view) {
-  std::array<i8, 240> values;
+  std::array<i32, 240> xvals;
   u32 idx{0};
+  i32 X{1};
   for (usize off{0}; off < std::size(view);) {
-    values[idx++] = 0;
-    if (view[off] == 'a') {
-      off += 5;
+    xvals[idx++] = X;
+    if (view[std::exchange(off, off + 5)] == 'a') {
       i32 value;
       off += parse<"\0\n">(view.substr(off), value);
-      values[idx++] = static_cast<i8>(value);
-    } else {
-      off += 5;
+      xvals[idx++] = X;
+      X += value;
     }
   }
-  return values;
+  return xvals;
 }
 
-PART1_IMPL(Day10, diff) {
-  i32 X{1}, score{0};
-  u32 tick{0}; 
-  while (tick < 20) {
-    X += diff[tick++];
-  }
-  for (u32 times{0}; times < 6; ++times) {
-    score += static_cast<i32>(tick) * X;
-    for (u32 skip{0}; skip < 40; ++skip) {
-      X += diff[tick++];
-    }
-  }
-  return score;
+PART1_IMPL(Day10, xvals) {
+  // array starts at 0, not 1
+  return (xvals[19] + 20 * xvals[59] + 100 * xvals[99] + 140 * xvals[139] + 180 * xvals[179] + 220 * xvals[219]);
 }
 
 namespace {
 // we know the output is going to be 8 chars always
 // use a static buffer for this and always return the address
 std::array<char, 8> screen;
-}
+} // namespace
 
-PART2_IMPL(Day10, diff, part1_answer) {
+PART2_IMPL(Day10, xvals, part1_answer) {
   std::array<letter, 8> letters;
-  i32 valX{1};
-  auto delta = std::begin(diff);
+  auto xv = std::begin(xvals);
   for (u8 row{0}; row < letter::height; ++row) {
     for (u8 idx{0}, column{0}; idx < 8; ++idx) {
-      for (u8 col{0}; col < letter::width; ++col, ++column) {
-        if (std::abs(column - valX) <= 1) {
+      for (u8 col{0}; col < letter::width; ++col) {
+        if (std::abs(column - *xv++) <= 1) {
           letters[idx].set_pixel(row, col);
         }
-        valX += *delta++;
+        ++column;
       }
     }
   }
