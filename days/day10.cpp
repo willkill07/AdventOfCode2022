@@ -23,7 +23,7 @@ PARSE_IMPL(Day10, view) {
 
 PART1_IMPL(Day10, xvals) {
   // array starts at 0, not 1
-  return (xvals[19] + 20 * xvals[59] + 100 * xvals[99] + 140 * xvals[139] + 180 * xvals[179] + 220 * xvals[219]);
+  return (20 * xvals[19] + 60 * xvals[59] + 100 * xvals[99] + 140 * xvals[139] + 180 * xvals[179] + 220 * xvals[219]);
 }
 
 namespace {
