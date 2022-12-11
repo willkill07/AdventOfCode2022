@@ -1,14 +1,14 @@
 #include <algorithm>
 #include <doctest/doctest.h>
 
-#include "days/day.hpp"
 #include "days/day11.hpp"
 #include "parsing.hpp"
 
 PARSE_IMPL(Day11, view) {
   using T = u64;
-  std::vector<day11::monkey<T>> monkeys;
+  std::array<day11::monkey<T>, day11::MAX_MONKEYS> monkeys;
 
+  u32 num_monkeys{0};
   usize off{0};
   while (off < std::size(view)) {
     // skip "Monkey _:"
@@ -16,12 +16,12 @@ PARSE_IMPL(Day11, view) {
     // advance to "Starting items: "
     off = view.find_first_of(':', off) + 2;
 
-    std::vector<T> values;
-    values.reserve(40);
+    std::array<T, 40> values;
+    u32 num_items{0};
     // we have a value!
     while (view[off] != ' ') {
       // do this manually for speed
-      values.push_back(static_cast<u32>(view[off] - '0') * 10lu + static_cast<u32>(view[off + 1] - '0'));
+      values[num_items++] = (static_cast<u32>(view[off] - '0') * 10lu + static_cast<u32>(view[off + 1] - '0'));
       off += 4;
     }
 
@@ -50,31 +50,33 @@ PARSE_IMPL(Day11, view) {
 
     day11::test<T> test{div, if_true, if_false};
 
-    monkeys.emplace_back(std::move(values), op, test);
+    monkeys[num_monkeys++] = day11::monkey<T>(std::move(values), num_items, op, test);
   }
 
-  return monkeys;
+  return day11::result_type{std::move(monkeys), num_monkeys};
 }
 
 SOLVE_IMPL(Day11, Part2, monkeys, part1_answer) {
-  auto working_monkeys = monkeys;
-  auto const count = std::size(working_monkeys);
+  auto working_monkeys = monkeys.max_monkeys;
+  auto const count = monkeys.num_monkeys;
+  std::span all_monkeys(working_monkeys.data(), count);
 
   constexpr u32 round_limit{Part2 ? 10'000u : 20u};
   for (u32 round{0}; round < round_limit; ++round) {
-    for (auto &monkey : working_monkeys) {
-      monkey.throw_items<Part2>(working_monkeys);
+    for (auto &monkey : all_monkeys) {
+      monkey.throw_items<Part2>(all_monkeys);
     }
   }
 
   std::array<u64, 8> counts;
   counts.fill(0lu);
+  std::span throws(counts.data(), count);
   for (usize midx{0}; midx < count; ++midx) {
-    counts[midx] = working_monkeys[midx].count();
+    throws[midx] = all_monkeys[midx].count();
   }
-  std::nth_element(std::begin(counts), std::end(counts) - 2, std::end(counts));
+  std::nth_element(std::begin(throws), std::end(throws) - 2, std::end(throws));
 
-  return counts[count - 1] * counts[count - 2];
+  return throws[count - 1] * throws[count - 2];
 }
 
 INSTANTIATE(Day11);
