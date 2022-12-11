@@ -67,6 +67,8 @@ struct letter {
         return 'E';
       case 0x02109c2fu:
         return 'F';
+      case 0x1c968526u:
+        return 'G';
       case 0x1294bd29u:
         return 'H';
       case 0x0c94210cu:
@@ -84,6 +86,8 @@ struct letter {
       case 0x1e11110fu:
         return 'Z';
       // unknown
+      case 0x0:
+        return ' ';
       default:
         return '?';
       }
