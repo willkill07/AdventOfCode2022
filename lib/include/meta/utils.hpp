@@ -34,7 +34,7 @@ exclusive_scan(std::array<T, N> const &arr) noexcept {
 }
 
 template <auto N, typename Fn, typename... Args>
-[[gnu::always_inline]] void
+[[gnu::always_inline]] inline void
 static_for(Fn &&body, Args &&...args) noexcept {
   using T = decltype(N);
   []<T... Is>(std::integer_sequence<T, Is...>, Fn && f, Args && ...a) __attribute__((always_inline)) {
@@ -44,7 +44,7 @@ static_for(Fn &&body, Args &&...args) noexcept {
 }
 
 template <auto N, typename Init, typename Fn, typename... Args>
-[[gnu::always_inline]] auto
+[[gnu::always_inline]] inline auto
 fold(Init&& init, Fn &&body, Args &&...args) noexcept {
   using T = decltype(N);
   return []<T... Is>(std::integer_sequence<T, Is...>, Init & acc, Fn && f, Args && ...a) __attribute__((always_inline)) {

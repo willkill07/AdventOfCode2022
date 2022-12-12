@@ -20,7 +20,7 @@ PARSE_IMPL(Day11, view) {
     // we have a value!
     while (view[off] != ' ') {
       // do this manually for speed
-      values[num_items++] = (static_cast<u32>(view[off] - '0') * 10lu + static_cast<u32>(view[off + 1] - '0'));
+      values[num_items++] = (static_cast<u32>(view[off] - '0') * 10u + static_cast<u32>(view[off + 1] - '0'));
       off += 4;
     }
 
@@ -69,7 +69,7 @@ SOLVE_IMPL(Day11, Part2, monkeys, part1_answer) {
   for (u32 round{0}; round < round_limit; ++round) {
     for (auto &monkey : all_monkeys) {
       for (u32 item : monkey.items()) {
-        u32 const worry_level{monkey.get_op().new_worry_level<Part2>(item)};
+        u32 const worry_level{monkey.get_op().template new_worry_level<Part2>(item)};
         u32 const destination = monkey.get_destination(worry_level);
         all_monkeys[destination].catch_item(worry_level);
       }

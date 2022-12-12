@@ -11,7 +11,7 @@ PARSE_IMPL(Day07, view) {
   std::vector<u32> sizes;
   std::vector<u32> dir_stack;
 
-  for (u32 off{0}; off < std::size(view);) {
+  for (u64 off{0}; off < std::size(view);) {
     if ('0' <= view[off] and view[off] <= '9') {
       u32 size;
       off += parse<"\0 ">(view.substr(off), size);
@@ -27,7 +27,7 @@ PARSE_IMPL(Day07, view) {
         dir_stack.push_back(0u);
       }
     }
-    off += view.substr(off).find_first_of('\n') + 1;
+    off += view.substr(off).find_first_of('\n') + 1lu;
   }
   sizes.reserve(std::size(sizes) + std::size(dir_stack));
   std::copy(std::rbegin(dir_stack), std::rend(dir_stack), std::back_insert_iterator(sizes));

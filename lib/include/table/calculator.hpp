@@ -61,11 +61,11 @@ public:
     requires std::constructible_from<std::string_view, T>
   {
     static_assert(sum(Array) == Columns, "Invalid grouping array specified");
-    static constexpr std::array Offsets{exclusive_scan(Array)};
     // walk through each "size" in grouping array
     // need this to be compile-time for the call to get_column below
     static_for<N>(
         []<usize Idx>(constant_t<Idx>, width_calculator<Columns> &self, auto const &cv, auto const &update_mask) {
+          constexpr std::array Offsets{exclusive_scan(Array)};
           constexpr usize const CurrLen{Array[Idx]};
           column_state const col{self.get_column<CurrLen, Offsets[Idx]>(update_mask)};
           if (col.count == 0) {

@@ -74,7 +74,9 @@ print_edge_row(std::array<usize, Width> const &widths) {
   static_assert(String.size() == Width * 2 + 1, "table format string mismatch for width");
 
   usize skipped{0};
+#if defined(__clang__)
 #pragma unroll
+#endif
   for (usize I{0}; I < Width; ++I) {
     if (widths[I] > 0) {
       auto const Left = String[2 * (I - skipped)];
