@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdio>
+#include <string>
+#include <vector>
 
 #include "chart/calculator.hpp"
 #include "fixed_string.hpp"
@@ -38,6 +40,21 @@ row(length_result<Parts> res) {
     result.append(Chars::parts[res.part]);
   }
   result.append(res.spacing, ' ');
+  return result;
+}
+
+template <unsigned Parts>
+std::vector<std::string_view>
+col(length_result<Parts> res) {
+  using Chars = characters_for<orientation::vertical>;
+  std::vector<std::string_view> result;
+  for (unsigned i{0}; i < res.whole_count; ++i) {
+    result.push_back(Chars::whole);
+  }
+  if (res.part > 0) {
+    result.push_back(Chars::parts[res.part]);
+  }
+  result.push_back(res.spacing, ' ');
   return result;
 }
 
