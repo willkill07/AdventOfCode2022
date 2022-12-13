@@ -14,9 +14,9 @@ PARSE_IMPL(Day11, view) {
     off = view.find_first_of('\n', off) + 3;
     // advance to "Starting items: "
     off = view.find_first_of(':', off) + 2;
-
-    std::array<u32, 40> values;
-    u32 num_items{0};
+    
+    std::array<u32, day11::MAX_ITEMS> values;
+    u8 num_items{0};
     // we have a value!
     while (view[off] != ' ') {
       // do this manually for speed
@@ -46,12 +46,12 @@ PARSE_IMPL(Day11, view) {
 
     // advance to " Test: divisible by "
     off = view.find_first_of('y', off) + 2;
-    u32 div;
+    u8 div;
     off += parse<"\0\n">(view.substr(off), div);
     off = view.find_first_of('y', off) + 2;
-    u32 if_true = static_cast<u32>(view[off] - '0');
+    u8 if_true = static_cast<u8>(view[off] - '0');
     off = view.find_first_of('y', off) + 2;
-    u32 if_false = static_cast<u32>(view[off] - '0');
+    u8 if_false = static_cast<u8>(view[off] - '0');
     off += 3;
 
     monkeys[num_monkeys++] = day11::monkey(std::move(values), num_items, op, div, if_true, if_false);

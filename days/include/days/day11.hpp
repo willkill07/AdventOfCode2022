@@ -10,7 +10,7 @@ namespace day11 {
 constexpr static inline u32 MAX_MONKEYS = 8;
 constexpr static inline u32 MAX_ITEMS = 40;
 
-enum class op_type { plus, multiplies, squares };
+enum class op_type : u8 { plus, multiplies, squares };
 
 namespace detail {
 
@@ -87,29 +87,29 @@ public:
   }
 };
 
-class monkey {
-  std::array<u32, MAX_ITEMS> m_items{};
-  u32 m_num_items{0};
-  operation m_op{};
-  u32 div_amount;
-  u32 if_true;
-  u32 if_false;
+class alignas(256) monkey {
   u64 m_inspection_count{0};
+  std::array<u32, MAX_ITEMS> m_items{};
+  operation m_op{};
+  u8 div_amount;
+  u8 m_num_items{0};
+  u8 if_true;
+  u8 if_false;
 
 public:
   constexpr monkey() noexcept = default;
 
   constexpr inline monkey(std::array<u32, MAX_ITEMS> &&items,
-                          u32 num_items,
+                          u8 num_items,
                           operation const &op,
-                          u32 div,
-                          u32 throw_if_true,
-                          u32 throw_if_false)
+                          u8 div,
+                          u8 throw_if_true,
+                          u8 throw_if_false)
 
       : m_items{std::move(items)},
-        m_num_items{num_items},
         m_op{op},
         div_amount{div},
+        m_num_items{num_items},
         if_true{throw_if_true},
         if_false{throw_if_false} {
   }
@@ -135,7 +135,7 @@ public:
   }
 
   [[nodiscard]] constexpr inline u32 get_destination(u32 value) const noexcept {
-    bool const cond = [](u32 v, u64 d) noexcept {
+    bool const cond = [](auto v, auto d) noexcept {
       switch (d) {
       case 3:
         return detail::fast_evenly_divisible<3>(v);
