@@ -1,7 +1,5 @@
 #include <numeric>
 
-#include <doctest/doctest.h>
-
 #include "days/day02.hpp"
 #include "parsing.hpp"
 

@@ -5,33 +5,31 @@
 #include "point2d.hpp"
 #include "types.hpp"
 
-template <typename T>
+template <typename T, typename Storage = std::vector<T>>
 struct offset_grid {
 
-  using iterator = typename std::vector<T>::iterator;
-  using const_iterator = typename std::vector<T>::const_iterator;
-  using pointer = typename std::vector<T>::pointer;
-  using const_pointer = typename std::vector<T>::const_pointer;
-  using reference = typename std::vector<T>::reference;
-  using const_reference = typename std::vector<T>::const_reference;
-  using value_type = typename std::vector<T>::value_type;
-
-  offset_grid() = delete;
+  using iterator = typename Storage::iterator;
+  using const_iterator = typename Storage::const_iterator;
+  using pointer = typename Storage::pointer;
+  using const_pointer = typename Storage::const_pointer;
+  using reference = typename Storage::reference;
+  using const_reference = typename Storage::const_reference;
+  using value_type = typename Storage::value_type;
   
   constexpr offset_grid(i32 x_min, i32 x_max, i32 y_min, i32 y_max)
       : width{x_max - x_min + 1},
         height{y_max - y_min + 1},
         minx{x_min},
         miny{y_min},
-        m_data(static_cast<usize>(width) * static_cast<usize>(height)) {
+        m_data(static_cast<u32>(width) * static_cast<u32>(height), 0) {
   }
 
   reference operator()(i32 x, i32 y) noexcept {
-    return m_data[static_cast<usize>(width * (y - miny) + (x - minx))];
+    return m_data[static_cast<u32>(width * (y - miny) + (x - minx))];
   }
 
   const_reference operator()(i32 x, i32 y) const noexcept {
-    return m_data[static_cast<usize>(width * (y - miny) + (x - minx))];
+    return m_data[static_cast<u32>(width * (y - miny) + (x - minx))];
   }
 
   reference operator()(point2d const& p) noexcept {
@@ -80,5 +78,5 @@ struct offset_grid {
 
 private:
   i32 width, height, minx, miny;
-  std::vector<T> m_data;
+  Storage m_data;
 };

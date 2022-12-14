@@ -1,8 +1,6 @@
 #include <bit>
 #include <numeric>
 
-#include <doctest/doctest.h>
-
 #include "days/day03.hpp"
 #include "parsing.hpp"
 
@@ -19,11 +17,11 @@ hash(std::string_view s) noexcept {
 } // namespace
 
 PARSE_IMPL(Day03, view) {
-  std::vector<std::string_view> result;
+  day03::list_t result;
   for (usize off{0}; off < std::size(view);) {
-    std::string_view line;
-    off += parse<"\0\n">(view.substr(off), line);
-    result.push_back(line);
+    usize const sz{view.find_first_of('\n', off) - off};
+    result.push(view.substr(off, sz));
+    off += sz + 1;
   }
   return result;
 }

@@ -1,5 +1,3 @@
-#include <doctest/doctest.h>
-
 #include "days/day12.hpp"
 
 PARSE_IMPL(Day12, view) {
@@ -7,7 +5,8 @@ PARSE_IMPL(Day12, view) {
   u32 const height = static_cast<u32>(view.size() / width);
   u32 const start = static_cast<u32>(view.find_first_of('S'));
   u32 const stop = static_cast<u32>(view.find_first_of('E', start));
-  std::vector<char> grid(std::begin(view), std::end(view));
+  owning_span<char, day12::MAX_SIZE> grid;
+  grid.push(std::begin(view), std::end(view));
   grid[start] = 'a';
   grid[stop] = 'z';
   return {std::move(grid), start, stop, width, height};
@@ -47,8 +46,12 @@ SOLVE_IMPL(Day12, Part2, data, part1_answer) {
   u32 const width{data.width};
 
   // single memory allocation for queued + frontier
-  std::vector<u8> queued(std::size(grid), 0u);
-  std::vector<pair> frontier(std::size(grid));
+  owning_span<u8, day12::MAX_SIZE> queued;
+  owning_span<pair, day12::MAX_SIZE> frontier;
+
+  // initialize queue
+  queued.resize(std::size(grid));
+  std::fill(std::begin(queued), std::end(queued), 0);
 
   // model a queue as two pointers
   pair const *front = std::data(frontier);

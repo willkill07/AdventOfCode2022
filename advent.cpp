@@ -5,7 +5,10 @@
 
 #include <unistd.h>
 
+#ifndef DOCTEST_CONFIG_DISABLE 
 #include <doctest/doctest.h>
+#endif
+
 #include <fmt/chrono.h>
 #include <fmt/compile.h>
 #include <fmt/core.h>
@@ -150,10 +153,14 @@ main(int argc, char **argv) {
   bool quiet{true};
 
   while (true) {
+#ifndef DOCTEST_CONFIG_DISABLE 
     switch (int const curr_opt{getopt(argc, argv, "Qmhtgv12TCNMd:p:b:w:")}; curr_opt) {
     case 't':
       return doctest::Context{argc, argv}.run();
       break;
+#else
+    switch (int const curr_opt{getopt(argc, argv, "Qmhgv12TCNMd:p:b:w:")}; curr_opt) {
+#endif
     case -1:
       goto option_parsing_done;
     case 'd': {
@@ -247,7 +254,7 @@ Advent of Code 2022 (in Modern C++)
 Usage: {} [-h|-t|[-Q] -m|[-1|-2] [-T|[[-N|-M] [-p <prec>] [-b <times>]] [-C] [-d <day_num>| -g [-w <num>]]]
 
     -h             show help
-    -t             run tests and exit
+    -t             run tests and exit (if compiled with support)
                    when specified first, other command-line args will be forwarded
                    automatically to doctest (invoke with --help to see options)
 

@@ -1,20 +1,19 @@
 #include <algorithm>
-#include <doctest/doctest.h>
 
 #include "days/day10.hpp"
 #include "letter.hpp"
+#include "owning_span.hpp"
 #include "parsing.hpp"
 
 PARSE_IMPL(Day10, view) {
-  std::array<i32, 240> xvals;
-  u32 idx{0};
+  day10::xstate_t xvals;
   i32 X{1};
   for (usize off{0}; off < std::size(view);) {
-    xvals[idx++] = X;
+    xvals.push(X);
     if (view[std::exchange(off, off + 5)] == 'a') {
       i32 value;
       off += parse<"\0\n">(view.substr(off), value);
-      xvals[idx++] = X;
+      xvals.push(X);
       X += value;
     }
   }
@@ -29,11 +28,11 @@ PART1_IMPL(Day10, xvals) {
 namespace {
 // we know the output is going to be 8 chars always
 // use a static buffer for this and always return the address
-std::array<char, 8> screen;
+owning_span<char, 8> screen;
 } // namespace
 
 PART2_IMPL(Day10, xvals, part1_answer) {
-  std::array<letter, 8> letters;
+  owning_span<letter, 8> letters(8);
   auto xv = std::begin(xvals);
   for (u8 row{0}; row < letter::height; ++row) {
     for (u8 idx{0}, column{0}; idx < 8; ++idx) {
@@ -45,9 +44,9 @@ PART2_IMPL(Day10, xvals, part1_answer) {
       }
     }
   }
-  screen.fill(0);
-  for (u32 i{0}; i < 8u; ++i) {
-    screen[i] = letters[i].as<char>();
+  screen.resize(0);
+  for (auto&& l : letters) {
+    screen.push(l.as<char>());
   }
   return {screen.data(), screen.size()};
 }

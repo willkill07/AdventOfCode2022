@@ -1,7 +1,6 @@
 #include <array>
 #include <span>
 #include <utility>
-#include <vector>
 
 #include "days/day.hpp"
 

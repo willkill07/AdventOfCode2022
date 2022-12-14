@@ -1,5 +1,9 @@
-#include <vector>
-
 #include "days/day.hpp"
+#include "owning_span.hpp"
 
-using Day07 = Day<7, std::vector<u32>, u32>;
+namespace day07 {
+  constexpr u32 const MAX_DIRS{512};
+  constexpr u32 const MAX_DEPTH{10};
+}
+
+using Day07 = Day<7, owning_span<u32, day07::MAX_DIRS>, u32>;

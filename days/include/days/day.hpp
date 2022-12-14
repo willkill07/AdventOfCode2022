@@ -5,6 +5,10 @@
 #include <string_view>
 #include <type_traits>
 
+#ifndef DOCTEST_CONFIG_DISABLE 
+#include <doctest/doctest.h>
+#endif
+
 #include "types.hpp"
 
 using std::string_view_literals::operator""sv;
@@ -76,6 +80,11 @@ private:
   template typename DAY::part2_result_t DAY::solve<true>(parse_result_t const &, std::optional<part1_result_t>)        \
       const noexcept
 
+#define DOCTEST_CONFIG_SUPER_FAST_ASSERTS
+
+#ifdef DOCTEST_CONFIG_DISABLE
+#define INSTANTIATE_TEST(Day, Input, Part1Answer, Part2Answer)
+#else
 #define INSTANTIATE_TEST(Day, Input, Part1Answer, Part2Answer)                                                         \
   TEST_CASE(#Day) {                                                                                                    \
     Day day;                                                                                                           \
@@ -83,9 +92,10 @@ private:
     auto const part1_actual = day.part1(view);                                                                         \
     auto const part2_actual = day.part2(view, part1_actual);                                                           \
     SUBCASE("Part 1") {                                                                                                \
-      CHECK(part1_actual == Part1Answer);                                                                              \
+      CHECK_EQ(part1_actual, Part1Answer);                                                                              \
     }                                                                                                                  \
     SUBCASE("Part 2") {                                                                                                \
-      CHECK(part2_actual == Part2Answer);                                                                              \
+      CHECK_EQ(part2_actual, Part2Answer);                                                                              \
     }                                                                                                                  \
   }
+#endif

@@ -1,8 +1,6 @@
 #include <algorithm>
 #include <type_traits>
 
-#include <doctest/doctest.h>
-
 #include "days/day13.hpp"
 
 namespace day13 {

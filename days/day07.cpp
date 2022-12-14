@@ -1,15 +1,14 @@
 #include <iterator>
 #include <numeric>
 
-#include <doctest/doctest.h>
-
 #include "days/day07.hpp"
+#include "owning_span.hpp"
 #include "parsing.hpp"
 
 PARSE_IMPL(Day07, view) {
 
-  std::vector<u32> sizes;
-  std::vector<u32> dir_stack;
+  owning_span<u32, day07::MAX_DIRS> sizes;
+  owning_span<u32, day07::MAX_DEPTH> dir_stack;
 
   for (u64 off{0}; off < std::size(view);) {
     if ('0' <= view[off] and view[off] <= '9') {
@@ -21,16 +20,15 @@ PARSE_IMPL(Day07, view) {
     } else if (view.substr(off + 2, 2) == "cd"sv) {
       off += 5; // advance to directory name
       if (view[off] == '.') {
-        sizes.push_back(dir_stack.back());
-        dir_stack.pop_back();
+        sizes.push(dir_stack.top());
+        dir_stack.pop();
       } else {
-        dir_stack.push_back(0u);
+        dir_stack.push(0u);
       }
     }
     off += view.substr(off).find_first_of('\n') + 1lu;
   }
-  sizes.reserve(std::size(sizes) + std::size(dir_stack));
-  std::copy(std::rbegin(dir_stack), std::rend(dir_stack), std::back_insert_iterator(sizes));
+  sizes.push(std::rbegin(dir_stack), std::rend(dir_stack));
   return sizes;
 }
 
@@ -44,7 +42,7 @@ constexpr u32 const total_space{70'000'000};
 constexpr u32 const needed_free_space{30'000'000};
 
 PART2_IMPL(Day07, sizes, part1_answer) {
-  u32 const used_space{sizes.back()};
+  u32 const used_space{sizes.top()};
   u32 const available_space{total_space - used_space};
   u32 const need_to_free{needed_free_space - available_space};
   return std::accumulate(std::begin(sizes), std::end(sizes), -1u, [need_to_free](u32 best_fit, u32 s) {

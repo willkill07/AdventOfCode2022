@@ -1,5 +1,4 @@
 #include <algorithm>
-#include <doctest/doctest.h>
 
 #include "days/day11.hpp"
 #include "parsing.hpp"

@@ -1,6 +1,9 @@
 #include <string_view>
-#include <vector>
-
 #include "days/day.hpp"
+#include "owning_span.hpp"
 
-using Day03 = Day<3, std::vector<std::string_view>, int>;
+namespace day03 {
+  using list_t = owning_span<std::string_view, 300>;
+}
+
+using Day03 = Day<3, day03::list_t, int>;

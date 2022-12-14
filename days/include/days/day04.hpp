@@ -1,8 +1,10 @@
-#include <vector>
-
 #include "days/day.hpp"
+#include "owning_span.hpp"
 
 namespace day04 {
+
+constexpr u32 const MAX_RANGES{1000};
+
 struct interval {
   u32 lo, hi;
 
@@ -25,4 +27,4 @@ struct range {
 
 } // namespace day04
 
-using Day04 = Day<4, std::vector<day04::range>, u32>;
+using Day04 = Day<4, owning_span<day04::range, day04::MAX_RANGES>, u32>;

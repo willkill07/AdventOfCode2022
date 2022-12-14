@@ -1,5 +1,3 @@
-#include <doctest/doctest.h>
-
 #include "days/day01.hpp"
 #include "parsing.hpp"
 

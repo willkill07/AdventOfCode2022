@@ -1,38 +1,29 @@
-#include <algorithm>
-#include <vector>
-
 #include "days/day.hpp"
+#include "owning_span.hpp"
 
 namespace day05 {
 
-using stack_t = std::vector<char>;
+constexpr u32 const MAX_STACK_HEIGHT{60};
+constexpr u32 const MAX_STACKS{9};
+constexpr u32 const MAX_COMMANDS{512};
+
+using stack_t = owning_span<char, MAX_STACK_HEIGHT>;
+using stacks_t = owning_span<stack_t, MAX_STACKS>;
 
 struct command {
   u32 count, from, to;
 
   template <bool Bulk>
-  [[gnu::always_inline]] inline void execute(std::vector<stack_t> &stacks) const noexcept {
-    stack_t &src{stacks[from - 1]};
-    stack_t &dst{stacks[to - 1]};
-    auto const new_src_end{std::end(src) - count};
-    auto const src_begin = [&] {
-      if constexpr (Bulk) {
-        // start copy "count" down from top (as one big move)
-        return new_src_end;
-      } else {
-        // start copy from the top->down (use reverse iterator)
-        return std::rbegin(src);
-      };
-    }();
-    std::copy_n(src_begin, count, std::back_inserter(dst));
-    src.erase(new_src_end, std::end(src));
-  }
+  [[gnu::always_inline]] inline void execute(stacks_t &stacks) const noexcept;
 };
 
+using commands_t = owning_span<command, MAX_COMMANDS>;
+
 struct state {
-  std::vector<stack_t> stacks;
-  std::vector<command> commands;
+  stacks_t stacks;
+  commands_t commands;
 };
+
 } // namespace day05
 
 using Day05 = Day<5, day05::state, std::string>;

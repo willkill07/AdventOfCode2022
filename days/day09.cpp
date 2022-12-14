@@ -1,4 +1,5 @@
-#include <doctest/doctest.h>
+#include <array>
+#include <span>
 
 #include "days/day09.hpp"
 #include "parsing.hpp"
@@ -15,7 +16,8 @@ PARSE_IMPL(Day09, view) {
   point2d location = point2d::origin();
 
   // build the command list
-  std::vector<std::pair<point2d, i32>> steps;
+  std::array<std::pair<point2d, i32>, 2000> steps;
+  usize step_count{0};
   usize off{0};
   while (off < std::size(view)) {
     char d;
@@ -36,7 +38,7 @@ PARSE_IMPL(Day09, view) {
         __builtin_unreachable();
       }
     }(d);
-    steps.push_back({direction, distance});
+    steps[step_count++] = {direction, distance};
     location += direction * distance;
     x_min = std::min(x_min, location.x);
     x_max = std::max(x_max, location.x);
@@ -45,15 +47,15 @@ PARSE_IMPL(Day09, view) {
   }
 
   // a visited grid is faster than std::unordered_set
-  offset_grid<u16> grid(x_min, x_max, y_min, y_max);
-
+  day09::grid_type grid(x_min, x_max, y_min, y_max);
+  
   // visit the origin
   grid(0, 0) = (1 << tracked_p1) | (1 << tracked_p2);
 
   // make the chain of size 10
   std::array<point2d, 1 + max_tracked> chain;
 
-  for (auto &&[dir, distance] : steps) {
+  for (auto &&[dir, distance] : std::span(std::data(steps), step_count)) {
     for (i32 move{0}; move < distance; ++move) {
       chain[0] += dir;
       // always simulate chain of size 10
