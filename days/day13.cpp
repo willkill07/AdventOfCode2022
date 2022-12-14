@@ -1,26 +1,29 @@
 #include <algorithm>
+#include <type_traits>
 
 #include <doctest/doctest.h>
 
 #include "days/day13.hpp"
 
+namespace day13 {
+
 // handle
 // ============================================================================
 
-constexpr inline i32
-day13::handle::get_value() const noexcept {
+constexpr inline typename handle::type
+handle::get_value() const noexcept {
   return value;
 }
 
-constexpr inline std::span<day13::handle const>
-day13::handle::get_list() const noexcept {
+constexpr inline std::span<handle const>
+handle::get_list() const noexcept {
   // handle refers to internal heap location
   if (value < 0) {
     // starting is the data pointer plus the offset (subtract since negated)
-    day13::handle const *start{day13::handle::data - value};
+    handle const *start{handle::data - value};
     // calculate the length of the list
     u32 len{0};
-    while (start[len] != day13::Null) {
+    while (start[len] != Null) {
       ++len;
     }
     // return the span of handles
@@ -32,7 +35,7 @@ day13::handle::get_list() const noexcept {
 }
 
 constexpr inline std::partial_ordering
-day13::handle::operator<=>(day13::handle const &b) const noexcept {
+handle::operator<=>(handle const &b) const noexcept {
   if (i32 const av{value}, bv{b.value}; av >= 0 and bv >= 0) {
     // we have a number
     if (av < bv) {
@@ -76,7 +79,7 @@ day13::handle::operator<=>(day13::handle const &b) const noexcept {
 // structure
 // ============================================================================
 
-constexpr inline day13::structure::structure(std::string_view buffer) noexcept
+constexpr inline structure::structure(std::string_view buffer) noexcept
     : ptr{std::begin(buffer)},
       end{std::end(buffer)} {
   while (ptr < end) {
@@ -88,13 +91,13 @@ constexpr inline day13::structure::structure(std::string_view buffer) noexcept
   }
 }
 
-constexpr inline std::span<day13::handle const>
-day13::structure::trials() const noexcept {
+constexpr inline std::span<handle const>
+structure::trials() const noexcept {
   return {std::data(raw_elems), num_elems};
 }
 
-constexpr inline day13::handle const *
-day13::structure::data() const noexcept {
+constexpr inline handle const *
+structure::data() const noexcept {
   return std::data(heap);
 }
 
@@ -102,11 +105,12 @@ day13::structure::data() const noexcept {
 // ============================================================================
 
 // List := '[' (Elem [',' Elem ]* )? ']'
-constexpr inline day13::handle
-day13::structure::List() noexcept {
+constexpr inline handle
+structure::List() noexcept {
+  using type = typename handle::type;
   ++ptr; // expect '['
-  std::array<day13::handle, MAX_LEN> elems;
-  u32 count{0};
+  std::array<handle, MAX_LEN> elems;
+  std::make_unsigned_t<type> count{0};
   if (*ptr != ']') {
     elems[count++] = Elem();
     while (*ptr != ']') {
@@ -120,23 +124,26 @@ day13::structure::List() noexcept {
   // copy list elements to list location in "heap"
   std::move(std::begin(elems), std::begin(elems) + count, std::begin(heap) + brk);
   // return location of list
-  return day13::handle{-std::exchange(brk, brk + static_cast<i32>(count))};
+  return handle(-std::exchange(brk, brk + static_cast<type>(count)));
 }
 
 // Elem := List | [0-9][0-9]?
-constexpr inline day13::handle
-day13::structure::Elem() noexcept {
+constexpr inline handle
+structure::Elem() noexcept {
+  using type = typename handle::type;
   if (*ptr == '[') {
     // list
     return List();
-  } else if (i32 const val{static_cast<i32>(*ptr++ - '0')}; *ptr >= '0' and *ptr <= '9') {
+  } else if (type const val(*ptr++ - '0'); *ptr >= '0' and *ptr <= '9') {
     // two digit number
-    return day13::handle{val * 10 + static_cast<i32>(*ptr++ - '0')};
+    return handle(static_cast<type>((val * 10) + (*ptr++ - '0')));
   } else {
     // single digit
-    return day13::handle{val};
+    return handle{val};
   }
 }
+
+} // namespace day13
 
 // solution
 // ============================================================================
@@ -145,37 +152,32 @@ PARSE_IMPL(Day13, view) {
   return {view};
 }
 
+template <day13::handle H>
+bool
+cmp(day13::handle const &v) noexcept {
+  return v < H;
+}
+
 SOLVE_IMPL(Day13, Part2, data, part1_answer) {
   // point the static data handle to the correct place
   day13::handle::set_data(data.data());
 
   std::span const all{data.trials()};
-  u32 const size{static_cast<u32>(std::size(all))};
-
-  u32 result{Part2};
 
   if constexpr (Part2) {
-    constexpr day13::handle const TWO{2}, SIX{6};
-    std::array<day13::handle, day13::MAX_ELEMS + 2> elems{};
-    std::copy(std::begin(all), std::end(all), std::begin(elems));
-    elems[size + 0] = TWO;
-    elems[size + 1] = SIX;
-    std::stable_sort(std::begin(elems), std::begin(elems) + size + 2);
-    for (u32 i{1}; auto e : elems) {
-      if (e == TWO || e == SIX) {
-        result *= i;
-      }
-      ++i;
-    }
+    i64 const two = 1l + std::count_if(std::begin(all), std::end(all), cmp<2>);
+    i64 const six = 2l + std::count_if(std::begin(all), std::end(all), cmp<6>);
+    return two * six;
   } else {
-    u32 trial{1};
-    for (u32 idx{0}; idx < size; idx += 2, ++trial) {
+    i64 result{0}, trial{1};
+    for (u32 idx{0}; idx < std::size(all); idx += 2) {
       if (all[idx] < all[idx + 1]) {
         result += trial;
       }
+      ++trial;
     }
+    return result;
   }
-  return result;
 }
 
 INSTANTIATE(Day13);

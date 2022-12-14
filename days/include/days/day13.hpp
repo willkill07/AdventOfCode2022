@@ -12,11 +12,13 @@ struct structure;
 
 struct handle {
 
+  using type = i16;
+
   static constexpr inline void set_data(handle const *data_pointer) {
     handle::data = data_pointer;
   }
 
-  constexpr inline handle(i32 v) noexcept
+  constexpr inline handle(type v) noexcept
       : value{v} {
   }
 
@@ -30,13 +32,13 @@ struct handle {
   constexpr inline bool operator==(handle const &) const noexcept = default;
   constexpr inline bool operator!=(handle const &) const noexcept = default;
 
-  constexpr inline i32 get_value() const noexcept;
+  constexpr inline type get_value() const noexcept;
   constexpr inline std::span<handle const> get_list() const noexcept;
+
+  type value{std::numeric_limits<type>::min()};
 
 private:
   static inline handle const *data = nullptr;
-
-  i32 value{std::numeric_limits<i32>::min()};
 };
 
 static constexpr handle Null = handle{};
@@ -60,9 +62,9 @@ private:
   std::array<handle, MAX_CELLS> heap;
   std::array<handle, MAX_ELEMS> raw_elems;
   u32 num_elems{0};
-  i32 brk{1};
+  typename handle::type brk{1};
 };
 
 } // namespace day13
 
-using Day13 = Day<13, day13::structure, u32>;
+using Day13 = Day<13, day13::structure, i64>;
