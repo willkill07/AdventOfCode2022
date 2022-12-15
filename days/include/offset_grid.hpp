@@ -1,5 +1,7 @@
 #pragma once
 
+#include <span>
+#include <string_view>
 #include <vector>
 
 #include "point2d.hpp"
@@ -16,67 +18,95 @@ struct offset_grid {
   using const_reference = typename Storage::const_reference;
   using value_type = typename Storage::value_type;
   
-  constexpr offset_grid(i32 x_min, i32 x_max, i32 y_min, i32 y_max)
-      : width{x_max - x_min + 1},
-        height{y_max - y_min + 1},
-        minx{x_min},
-        miny{y_min},
-        m_data(static_cast<u32>(width) * static_cast<u32>(height), 0) {
+  constexpr inline offset_grid(i32 x_min, i32 x_max, i32 y_min, i32 y_max) noexcept 
+      : m_width{x_max - x_min + 1},
+        m_height{y_max - y_min + 1},
+        m_xmin{x_min},
+        m_ymin{y_min},
+        m_data(static_cast<u32>(m_width) * static_cast<u32>(m_height), 0) {
   }
 
-  reference operator()(i32 x, i32 y) noexcept {
-    return m_data[static_cast<u32>(width * (y - miny) + (x - minx))];
+  constexpr inline reference operator()(i32 x, i32 y) noexcept {
+    return m_data[static_cast<u32>(m_width * (y - m_ymin) + (x - m_xmin))];
   }
 
-  const_reference operator()(i32 x, i32 y) const noexcept {
-    return m_data[static_cast<u32>(width * (y - miny) + (x - minx))];
+  constexpr inline const_reference operator()(i32 x, i32 y) const noexcept {
+    return m_data[static_cast<u32>(m_width * (y - m_ymin) + (x - m_xmin))];
   }
 
-  reference operator()(point2d const& p) noexcept {
+  constexpr inline reference operator()(point2d const& p) noexcept {
     return (*this)(p.x, p.y);
   }
 
-  const_reference operator()(point2d const& p) const noexcept {
+  constexpr inline const_reference operator()(point2d const& p) const noexcept {
     return (*this)(p.x, p.y);
   }
 
-  constexpr iterator begin() {
+  constexpr inline iterator begin() noexcept {
     return m_data.begin();
   }
 
-  constexpr const_iterator begin() const {
+  constexpr inline const_iterator begin() const noexcept {
     return m_data.begin();
   }
 
-  constexpr const_iterator cbegin() const {
+  constexpr inline const_iterator cbegin() const noexcept {
     return m_data.cbegin();
   }
 
-  constexpr iterator end() {
+  constexpr inline iterator end() noexcept {
     return m_data.end();
   }
 
-  constexpr const_iterator end() const {
+  constexpr inline const_iterator end() const noexcept {
     return m_data.end();
   }
 
-  constexpr const_iterator cend() const {
+  constexpr inline const_iterator cend() const noexcept {
     return m_data.cend();
   }
 
-  constexpr usize size() const {
+  constexpr inline usize size() const noexcept {
     return m_data.size();
   }
 
-  constexpr pointer data() {
+  constexpr inline pointer data() noexcept {
     return m_data.data();
   }
 
-  constexpr const_pointer data() const {
+  constexpr inline const_pointer data() const noexcept {
     return m_data.data();
+  }
+
+  constexpr inline i32 xmin() const noexcept {
+    return m_xmin;
+  }
+
+  constexpr inline i32 xmax() const noexcept {
+    return m_xmin + m_width - 1;
+  }
+
+  constexpr inline i32 ymin() const noexcept {
+    return m_ymin;
+  }
+  
+  constexpr inline i32 ymax() const noexcept {
+    return m_ymin + m_height - 1;
+  }
+
+  constexpr inline u32 width() const noexcept {
+    return static_cast<u32>(m_width);
+  }
+
+  constexpr inline u32 height() const noexcept {
+    return static_cast<u32>(m_height);
+  }
+  
+  constexpr inline std::string_view row(u32 row_num) const noexcept requires std::same_as<T, char> {
+    return std::string_view{data() + row_num * width(), width()};
   }
 
 private:
-  i32 width, height, minx, miny;
+  i32 m_width, m_height, m_xmin, m_ymin;
   Storage m_data;
 };
