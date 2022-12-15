@@ -88,6 +88,10 @@ struct owning_span {
     return m_data[idx];
   }
 
+  constexpr inline void clear() noexcept {
+    m_size = 0;
+  }
+
   constexpr inline void resize(u32 sz) noexcept {
     m_size = sz;
   }

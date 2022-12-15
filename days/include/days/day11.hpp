@@ -1,8 +1,7 @@
-#include <array>
-#include <span>
 #include <utility>
 
 #include "days/day.hpp"
+#include "owning_span.hpp"
 
 namespace day11 {
 
@@ -86,20 +85,20 @@ public:
   }
 };
 
-class alignas(256) monkey {
+using items_type = owning_span<u32, MAX_ITEMS>;
+
+class monkey {
   u64 m_inspection_count{0};
-  std::array<u32, MAX_ITEMS> m_items{};
+  items_type m_items;
   operation m_op{};
   u8 div_amount;
-  u8 m_num_items{0};
   u8 if_true;
   u8 if_false;
 
 public:
   constexpr monkey() noexcept = default;
 
-  constexpr inline monkey(std::array<u32, MAX_ITEMS> &&items,
-                          u8 num_items,
+  constexpr inline monkey(items_type &&items,
                           operation const &op,
                           u8 div,
                           u8 throw_if_true,
@@ -108,21 +107,21 @@ public:
       : m_items{std::move(items)},
         m_op{op},
         div_amount{div},
-        m_num_items{num_items},
         if_true{throw_if_true},
         if_false{throw_if_false} {
   }
 
   constexpr inline std::span<u32 const> items() const noexcept {
-    return std::span(m_items.data(), m_num_items);
+    return m_items;
   }
 
   constexpr inline void update_throws() noexcept {
-    m_inspection_count += std::exchange(m_num_items, 0);
+    m_inspection_count += std::size(m_items);
+    m_items.resize(0);
   }
 
   constexpr inline void catch_item(u32 item) noexcept {
-    m_items[m_num_items++] = item;
+    m_items.push(item);
   }
 
   constexpr inline u64 count() noexcept {
@@ -160,18 +159,6 @@ public:
   }
 };
 
-struct result_type {
-  std::array<monkey, MAX_MONKEYS> monkey_buffer;
-  u32 monkey_len;
-
-  result_type() noexcept = delete;
-
-  constexpr inline result_type(std::array<monkey, MAX_MONKEYS> &&m, u32 n) noexcept
-      : monkey_buffer{std::move(m)},
-        monkey_len{n} {
-  }
-};
-
 } // namespace day11
 
-using Day11 = Day<11, day11::result_type, u64>;
+using Day11 = Day<11, owning_span<day11::monkey, day11::MAX_MONKEYS>, u64>;

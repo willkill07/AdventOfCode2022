@@ -1,25 +1,24 @@
 #include <algorithm>
 
 #include "days/day11.hpp"
+#include "owning_span.hpp"
 #include "parsing.hpp"
 
 PARSE_IMPL(Day11, view) {
-  std::array<day11::monkey, day11::MAX_MONKEYS> monkeys;
 
-  u32 num_monkeys{0};
-  usize off{0};
-  while (off < std::size(view)) {
+  owning_span<day11::monkey, day11::MAX_MONKEYS> monkeys;
+
+  for (usize off{0}; off < std::size(view); ) {
     // skip "Monkey _:"
     off = view.find_first_of('\n', off) + 3;
     // advance to "Starting items: "
     off = view.find_first_of(':', off) + 2;
     
-    std::array<u32, day11::MAX_ITEMS> values;
-    u8 num_items{0};
+    day11::items_type items;
     // we have a value!
     while (view[off] != ' ') {
       // do this manually for speed
-      values[num_items++] = (static_cast<u32>(view[off] - '0') * 10u + static_cast<u32>(view[off + 1] - '0'));
+      items.push(static_cast<u32>(view[off] - '0') * 10u + static_cast<u32>(view[off + 1] - '0'));
       off += 4;
     }
 
@@ -53,34 +52,31 @@ PARSE_IMPL(Day11, view) {
     u8 if_false = static_cast<u8>(view[off] - '0');
     off += 3;
 
-    monkeys[num_monkeys++] = day11::monkey(std::move(values), num_items, op, div, if_true, if_false);
+    monkeys.push({std::move(items), op, div, if_true, if_false});
   }
 
-  return day11::result_type{std::move(monkeys), num_monkeys};
+  return monkeys;
 }
 
-SOLVE_IMPL(Day11, Part2, monkeys, part1_answer) {
-  auto working_monkeys = monkeys.monkey_buffer;
-  u32 const count = monkeys.monkey_len;
-  std::span all_monkeys(working_monkeys.data(), count);
-
+SOLVE_IMPL(Day11, Part2, original, part1_answer) {
+  auto monkeys = original;
   constexpr u32 round_limit{Part2 ? 10'000u : 20u};
+
   for (u32 round{0}; round < round_limit; ++round) {
-    for (auto &monkey : all_monkeys) {
+    for (auto &monkey : monkeys) {
       for (u32 item : monkey.items()) {
         u32 const worry_level{monkey.get_op().template new_worry_level<Part2>(item)};
         u32 const destination = monkey.get_destination(worry_level);
-        all_monkeys[destination].catch_item(worry_level);
+        monkeys[destination].catch_item(worry_level);
       }
       monkey.update_throws();
     }
   }
 
-  std::array<u64, 8> counts;
-  counts.fill(0lu);
-  std::span throws(counts.data(), count);
-  for (usize midx{0}; midx < count; ++midx) {
-    throws[midx] = all_monkeys[midx].count();
+  u32 const count{std::size(monkeys)};
+  owning_span<u64, day11::MAX_MONKEYS> throws(count, 0lu);
+  for (u32 midx{0}; midx < std::size(throws); ++midx) {
+    throws[midx] = monkeys[midx].count();
   }
   std::nth_element(std::begin(throws), std::end(throws) - 2, std::end(throws));
 
