@@ -2,6 +2,7 @@
 #include <span>
 
 #include "days/day09.hpp"
+#include "owning_span.hpp"
 #include "parsing.hpp"
 #include "point2d.hpp"
 
@@ -16,8 +17,7 @@ PARSE_IMPL(Day09, view) {
   point2d location = point2d::origin();
 
   // build the command list
-  std::array<std::pair<point2d, i32>, 2000> steps;
-  usize step_count{0};
+  owning_span<std::pair<point2d, i32>, 2000> steps;
   usize off{0};
   while (off < std::size(view)) {
     char d;
@@ -38,7 +38,7 @@ PARSE_IMPL(Day09, view) {
         __builtin_unreachable();
       }
     }(d);
-    steps[step_count++] = {direction, distance};
+    steps.push({direction, distance});
     location += direction * distance;
     x_min = std::min(x_min, location.x);
     x_max = std::max(x_max, location.x);
@@ -55,7 +55,7 @@ PARSE_IMPL(Day09, view) {
   // make the chain of size 10
   std::array<point2d, 1 + max_tracked> chain;
 
-  for (auto &&[dir, distance] : std::span(std::data(steps), step_count)) {
+  for (auto &&[dir, distance] : steps) {
     for (i32 move{0}; move < distance; ++move) {
       chain[0] += dir;
       // always simulate chain of size 10
