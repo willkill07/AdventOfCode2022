@@ -48,7 +48,7 @@ PARSE_IMPL(Day09, view) {
 
   // a visited grid is faster than std::unordered_set
   day09::grid_type grid(x_min, x_max, y_min, y_max);
-  
+
   // visit the origin
   grid(0, 0) = (1 << tracked_p1) | (1 << tracked_p2);
 
@@ -75,7 +75,7 @@ PARSE_IMPL(Day09, view) {
       }
     }
   }
-  
+
   return grid;
 }
 

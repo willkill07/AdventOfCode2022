@@ -45,7 +45,7 @@ PART2_IMPL(Day10, xvals, part1_answer) {
     }
   }
   screen.resize(0);
-  for (auto&& l : letters) {
+  for (auto &&l : letters) {
     screen.push(l.as<char>());
   }
   return {screen.data(), screen.size()};

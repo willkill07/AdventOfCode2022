@@ -8,12 +8,12 @@ PARSE_IMPL(Day11, view) {
 
   owning_span<day11::monkey, day11::MAX_MONKEYS> monkeys;
 
-  for (usize off{0}; off < std::size(view); ) {
+  for (usize off{0}; off < std::size(view);) {
     // skip "Monkey _:"
     off = view.find_first_of('\n', off) + 3;
     // advance to "Starting items: "
     off = view.find_first_of(':', off) + 2;
-    
+
     day11::items_type items;
     // we have a value!
     while (view[off] != ' ') {

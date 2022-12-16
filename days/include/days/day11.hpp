@@ -98,11 +98,7 @@ class monkey {
 public:
   constexpr monkey() noexcept = default;
 
-  constexpr inline monkey(items_type &&items,
-                          operation const &op,
-                          u8 div,
-                          u8 throw_if_true,
-                          u8 throw_if_false)
+  constexpr inline monkey(items_type &&items, operation const &op, u8 div, u8 throw_if_true, u8 throw_if_false)
 
       : m_items{std::move(items)},
         m_op{op},

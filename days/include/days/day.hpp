@@ -5,7 +5,7 @@
 #include <string_view>
 #include <type_traits>
 
-#ifndef DOCTEST_CONFIG_DISABLE 
+#ifndef DOCTEST_CONFIG_DISABLE
 #include <doctest/doctest.h>
 #endif
 
@@ -92,10 +92,10 @@ private:
     auto const part1_actual = day.part1(view);                                                                         \
     auto const part2_actual = day.part2(view, part1_actual);                                                           \
     SUBCASE("Part 1") {                                                                                                \
-      CHECK_EQ(part1_actual, Part1Answer);                                                                              \
+      CHECK_EQ(part1_actual, Part1Answer);                                                                             \
     }                                                                                                                  \
     SUBCASE("Part 2") {                                                                                                \
-      CHECK_EQ(part2_actual, Part2Answer);                                                                              \
+      CHECK_EQ(part2_actual, Part2Answer);                                                                             \
     }                                                                                                                  \
   }
 #endif

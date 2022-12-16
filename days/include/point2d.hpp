@@ -16,10 +16,10 @@ struct point2d {
         y{y_} {
   }
 
-  constexpr inline point2d(point2d const&) noexcept = default;
+  constexpr inline point2d(point2d const &) noexcept = default;
   constexpr inline point2d(point2d &&) noexcept = default;
-  constexpr inline point2d& operator=(point2d const&) noexcept = default;
-  constexpr inline point2d& operator=(point2d &&) noexcept = default;
+  constexpr inline point2d &operator=(point2d const &) noexcept = default;
+  constexpr inline point2d &operator=(point2d &&) noexcept = default;
 
   constexpr inline point2d &operator+=(point2d const &o) noexcept {
     x += o.x;
@@ -69,7 +69,7 @@ struct point2d {
     return std::abs(x) + std::abs(y);
   }
 
-  constexpr inline i32 manhattan(point2d const& o) const noexcept {
+  constexpr inline i32 manhattan(point2d const &o) const noexcept {
     return (*this - o).abs();
   }
 

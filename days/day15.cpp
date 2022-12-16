@@ -13,7 +13,7 @@ namespace {
 struct mark {
   i32 value;
   bool start;
-  constexpr auto operator<=>(mark const&) const noexcept = default;
+  constexpr auto operator<=>(mark const &) const noexcept = default;
 };
 
 } // namespace
@@ -32,7 +32,7 @@ PARSE_IMPL(Day15, view) {
 PART1_IMPL(Day15, data) {
   i32 const target_row = (data.size() <= 15 ? 10 : 2'000'000);
   owning_span<mark, day15::MAX_ENTRIES * 2> marks;
-  for (auto&& [s, b] : data) {
+  for (auto &&[s, b] : data) {
     i32 const units_away{s.manhattan(b) - std::abs(target_row - s.y)};
     if (units_away >= 0) {
       marks.push({s.x - units_away, true});
@@ -41,7 +41,7 @@ PART1_IMPL(Day15, data) {
   }
   std::sort(std::begin(marks), std::end(marks));
   i32 answer{-1}, count{0}, prev{std::numeric_limits<i32>::min()};
-  for (auto&& [x, start] : marks) {
+  for (auto &&[x, start] : marks) {
     // if we still have at least one active range, add the difference
     if (count > 0) {
       answer += (x - prev);
@@ -55,26 +55,29 @@ PART1_IMPL(Day15, data) {
 
 namespace {
 
-constexpr inline point2d rotate_left(point2d const &p) noexcept {
+constexpr inline point2d
+rotate_left(point2d const &p) noexcept {
   return {p.x + p.y, p.y - p.x};
 }
 
-constexpr inline point2d rotate_right(point2d const &p) noexcept {
+constexpr inline point2d
+rotate_right(point2d const &p) noexcept {
   return {(p.x - p.y) / 2, (p.y + p.x) / 2};
 }
 
 struct bounding_box {
   point2d left, right;
-  constexpr inline auto operator <=>(bounding_box const&) const noexcept = default;
+  constexpr inline auto operator<=>(bounding_box const &) const noexcept = default;
 };
 
 template <std::forward_iterator Iter>
-constexpr inline u32 filter_unique(Iter begin, Iter end) noexcept {
+constexpr inline u32
+filter_unique(Iter begin, Iter end) noexcept {
   std::sort(begin, end);
   return static_cast<u32>(std::distance(begin, std::unique(begin, end)));
 }
 
-}
+} // namespace
 
 PART2_IMPL(Day15, data, part1_answer) {
   auto const N{std::size(data)};
@@ -82,7 +85,7 @@ PART2_IMPL(Day15, data, part1_answer) {
 
   owning_span<bounding_box, day15::MAX_ENTRIES> bounds;
 
-  for (auto&& [s, b] : data) {
+  for (auto &&[s, b] : data) {
     i32 const spread{s.manhattan(b) + 1};
     // align the box to the x-axis (expands by sqrt(2))
     bounds.push({rotate_left({s.x - spread, s.y}), rotate_left({s.x + spread, s.y})});
@@ -109,13 +112,13 @@ PART2_IMPL(Day15, data, part1_answer) {
   xlocs.resize(filter_unique(std::begin(xlocs), std::end(xlocs)));
   ylocs.resize(filter_unique(std::begin(ylocs), std::end(ylocs)));
 
-  for (auto&& x : xlocs) {
-    for (auto&& y : ylocs) {
+  for (auto &&x : xlocs) {
+    for (auto &&y : ylocs) {
       // re-align to normal coordinate system -- restricts by factor of sqrt(2)
       point2d const v{rotate_right({x, y})};
       if (v.x >= 0 and v.x <= limit and v.y >= 0 and v.y <= limit) {
         bool candidate{true};
-        for (auto&& [s, b] : data) {
+        for (auto &&[s, b] : data) {
           // only a valid candidate IFF outside of the sensor region
           candidate = candidate and (s.manhattan(v) > s.manhattan(b));
         }
