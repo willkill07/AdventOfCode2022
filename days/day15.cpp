@@ -1,12 +1,10 @@
+#include <iterator>
+#include <limits>
+
 #include "days/day15.hpp"
 #include "owning_span.hpp"
 #include "parsing.hpp"
 #include "types.hpp"
-
-#include <fmt/core.h>
-#include <iterator>
-#include <limits>
-#include <math.h>
 
 namespace {
 
@@ -70,7 +68,7 @@ struct bounding_box {
   constexpr inline auto operator<=>(bounding_box const &) const noexcept = default;
 };
 
-template <std::forward_iterator Iter>
+template <std::random_access_iterator Iter>
 constexpr inline u32
 filter_unique(Iter begin, Iter end) noexcept {
   std::sort(begin, end);
