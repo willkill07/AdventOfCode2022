@@ -16,7 +16,11 @@ target_sources(days
   day13.cpp
   day14.cpp
   day15.cpp
+  day16.cpp
 )
+
+find_package(OpenMP REQUIRED)
 
 target_include_directories(days PUBLIC include)
 target_link_libraries(days PRIVATE advent_common lib)
+target_link_libraries(days PUBLIC OpenMP::OpenMP_CXX)
