@@ -127,14 +127,14 @@ SOLVE_IMPL(Day16, Part2, data, unused_part1) {
   visit(dp, data.flow, data.dist, start, time, mask, 0);
 
   if constexpr (Part2) {
-    #if 0
+#if 0
     // it would be nice if this worked, but it doesn't
     auto const best_human = std::max_element(std::begin(dp), std::end(dp));
     i32 const human_flow{*best_human};
     u32 const new_mask{static_cast<u32>(std::distance(std::begin(dp), best_human))};
     visit(dp, data.flow, data.dist, start, time, new_mask, human_flow);
     return *std::max_element(std::begin(dp), std::end(dp));
-    #endif
+#endif
     i32 max{0};
 #pragma omp parallel for reduction(max : max)
     for (u32 m1 = 0; m1 < std::size(dp); ++m1) {

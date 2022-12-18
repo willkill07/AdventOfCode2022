@@ -17,6 +17,8 @@ target_sources(days
   day14.cpp
   day15.cpp
   day16.cpp
+  day17.cpp
+  day18.cpp
 )
 
 find_package(OpenMP REQUIRED)
