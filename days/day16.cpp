@@ -1,8 +1,7 @@
 #include "days/day16.hpp"
 #include "parsing.hpp"
 
-#include <fmt/core.h>
-#include <fmt/ranges.h>
+#include <algorithm>
 
 PARSE_IMPL(Day16, view) {
 
@@ -127,18 +126,11 @@ SOLVE_IMPL(Day16, Part2, data, unused_part1) {
   visit(dp, data.flow, data.dist, start, time, mask, 0);
 
   if constexpr (Part2) {
-#if 0
-    // it would be nice if this worked, but it doesn't
-    auto const best_human = std::max_element(std::begin(dp), std::end(dp));
-    i32 const human_flow{*best_human};
-    u32 const new_mask{static_cast<u32>(std::distance(std::begin(dp), best_human))};
-    visit(dp, data.flow, data.dist, start, time, new_mask, human_flow);
-    return *std::max_element(std::begin(dp), std::end(dp));
-#endif
     i32 max{0};
-#pragma omp parallel for reduction(max : max)
+    // the dynamic schedule here is important since we are doing upper-triangular
+#pragma omp parallel for reduction(max : max) schedule(dynamic)
     for (u32 m1 = 0; m1 < std::size(dp); ++m1) {
-      for (u32 m2 = 0; m2 < std::size(dp); ++m2) {
+      for (u32 m2 = m1 + 1; m2 < std::size(dp); ++m2) {
         if (not(m1 & m2)) {
           max = std::max(max, dp[m1] + dp[m2]);
         }
