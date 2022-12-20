@@ -84,57 +84,58 @@ SOLVE_IMPL(Day19, Part2, blueprints, part1_answer) {
   u32 const upper{Part2 ? std::min(std::size(blueprints), 3u) : std::size(blueprints)};
 
   owning_span<u32, 30> scores(upper, 0u);
-  {
-    owning_span<std::jthread, 30> threads;
-    for (u32 i{0u}; i < upper; ++i) {
-      threads.push(std::jthread(
-          [&](day19::blueprint const &blueprint, u32 &score) {
-            day19::robot const max_limit = max_for(blueprint);
+  owning_span<std::thread, 30> threads;
+  for (u32 i{0u}; i < upper; ++i) {
+    threads.push(std::thread(
+        [&](day19::blueprint const &blueprint, u32 &score) {
+          day19::robot const max_limit = max_for(blueprint);
 
-            u32 max_geodes{0u};
+          u32 max_geodes{0u};
 
-            // recursive lambda time!
-            auto step = [&](auto &self,
-                            std::array<u8, 4> const &resources,
-                            std::array<u8, 4> const &robots,
-                            u32 time) noexcept -> u32 {
-              u32 planned{resources[Geode] + robots[Geode] * time};
+          // recursive lambda time!
+          auto step = [&](auto &self,
+                          std::array<u8, 4> const &resources,
+                          std::array<u8, 4> const &robots,
+                          u32 time) noexcept -> u32 {
+            u32 planned{resources[Geode] + robots[Geode] * time};
 
-              if (planned + (time * time - time) / 2u <= max_geodes) {
-                return 0;
-              }
+            if (planned + (time * time - time) / 2u <= max_geodes) {
+              return 0;
+            }
 
-              // try to construct each robot
-              for (u32 robot_idx{0}; robot_idx < 4; robot_idx++) {
-                // never create more of a resource than what we can possible use (except for Geode)
-                if (robot_idx == Geode or max_limit[robot_idx] > robots[robot_idx]) {
-                  // if time for resources + creation time is within limit, then explore
-                  if (u32 const wait{time_until_available(blueprint[robot_idx], resources, robots) + 1u}; time > wait) {
-                    // evolve resources
-                    std::array<u8, 4> const next_resources{
-                        static_cast<u8>(resources[Ore] + robots[Ore] * wait - blueprint[robot_idx][Ore]),
-                        static_cast<u8>(resources[Clay] + robots[Clay] * wait - blueprint[robot_idx][Clay]),
-                        static_cast<u8>(resources[Obsidian] + robots[Obsidian] * wait - blueprint[robot_idx][Obsidian]),
-                        static_cast<u8>(resources[Geode] + robots[Geode] * wait)};
-                    // update robot count
-                    std::array<u8, 4> next_robots{robots};
-                    ++next_robots[robot_idx];
-                    // continue our DFS
-                    planned = std::max(planned, self(self, next_resources, next_robots, time - wait));
-                  }
+            // try to construct each robot
+            for (u32 robot_idx{0}; robot_idx < 4; robot_idx++) {
+              // never create more of a resource than what we can possible use (except for Geode)
+              if (robot_idx == Geode or max_limit[robot_idx] > robots[robot_idx]) {
+                // if time for resources + creation time is within limit, then explore
+                if (u32 const wait{time_until_available(blueprint[robot_idx], resources, robots) + 1u}; time > wait) {
+                  // evolve resources
+                  std::array<u8, 4> const next_resources{
+                      static_cast<u8>(resources[Ore] + robots[Ore] * wait - blueprint[robot_idx][Ore]),
+                      static_cast<u8>(resources[Clay] + robots[Clay] * wait - blueprint[robot_idx][Clay]),
+                      static_cast<u8>(resources[Obsidian] + robots[Obsidian] * wait - blueprint[robot_idx][Obsidian]),
+                      static_cast<u8>(resources[Geode] + robots[Geode] * wait)};
+                  // update robot count
+                  std::array<u8, 4> next_robots{robots};
+                  ++next_robots[robot_idx];
+                  // continue our DFS
+                  planned = std::max(planned, self(self, next_resources, next_robots, time - wait));
                 }
               }
-              // update max geodes after exploring subtree
-              max_geodes = std::max(max_geodes, planned);
-              return planned;
-            };
+            }
+            // update max geodes after exploring subtree
+            max_geodes = std::max(max_geodes, planned);
+            return planned;
+          };
 
-            // simulate + write out score
-            score = step(step, empty, init, (Part2 ? 32u : 24u));
-          },
-          std::cref(blueprints[i]),
-          std::ref(scores[i])));
-    }
+          // simulate + write out score
+          score = step(step, empty, init, (Part2 ? 32u : 24u));
+        },
+        std::cref(blueprints[i]),
+        std::ref(scores[i])));
+  }
+  for (auto& t : threads) {
+    t.join();
   }
 
   if constexpr (Part2) {
