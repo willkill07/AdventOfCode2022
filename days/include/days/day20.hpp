@@ -1,20 +1,16 @@
-#include <array>
-
 #include "days/day.hpp"
 #include "owning_span.hpp"
 
 namespace day20 {
-  struct node {
-    i64 value;
-    u32 prev;
-    u32 next;
-  };
 
-  using list_type = owning_span<node, 5000>;
+  constexpr u32 const MAXN{5000u};
+
+  template <typename T>
+  using list_type = owning_span<T, MAXN>;
 
   struct result {
-    list_type list;
-    u32 zero_index;
+    list_type<i64> numbers;
+    unsigned zero_index;
   };
 }
 

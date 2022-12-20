@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <cstring>
+#include <numeric>
 
 #include "days/day20.hpp"
 #include "owning_span.hpp"
@@ -6,110 +8,106 @@
 
 namespace {
 
-template <u32 Den>
-constexpr inline i32
-fast_rem(i64 val) noexcept {
-  return val % Den;
-}
-
-constexpr inline i32
-fast_rem(i64 val, u32 den) {
-  if (den == 4999) [[likely]] {
-    return fast_rem<4999>(val);
-  } else if (den == 6) {
-    return fast_rem<6>(val);
+template <typename T>
+constexpr inline T
+fast_mod(T val, unsigned N) {
+  if (N == 5000) {
+    return val % 5000u;
+  } else if (N == 4999) {
+    return val % 4999u;
   } else {
-    return static_cast<i32>(val % den);
+    return val % N;
   }
 }
 
-constexpr inline void
-unhook(u32 id, typename day20::list_type &list) noexcept {
-  u32 const next{list[id].next}, prev{list[id].prev};
-  list[prev].next = next;
-  list[next].prev = prev;
-}
+template <unsigned Steps>
+inline i64
+run(day20::list_type<i64> const &val, unsigned zero_index) noexcept {
+  unsigned const N{std::size(val)};
 
-constexpr inline void
-hook_after(u32 id, typename day20::list_type &list, u32 prev) noexcept {
-  __builtin_assume(id != prev);
-  u32 const next = list[prev].next;
-  list[id].prev = prev;
-  list[id].next = next;
-  list[next].prev = id;
-  list[prev].next = id;
-}
+  // populate id array with [0, 1, 2, 3, ... ]
+  day20::list_type<unsigned> id(N);
+  std::iota(std::begin(id), std::end(id), 0u);
 
-constexpr inline u32
-prev(u32 from, typename day20::list_type &list, u32 amount) noexcept {
-  for (u32 i{0}; i < amount; ++i) {
-    from = list[from].prev;
+  // could use C++ standard library:
+  //    std::distance(std::begin(haystack), std::find(std::begin(haystack), std::end(haystack), needle))
+  // but it was slower and generated less optimal code
+  auto const index_of = [](auto const needle, auto const &haystack, auto const n) {
+    for (unsigned i{0}; i < n; ++i) {
+      if (haystack[i] == needle) {
+        return i;
+      }
+    }
+    return n;
+  };
+
+  unsigned *base{std::begin(id)};
+  // for each step
+  for (unsigned step{0}; step < Steps; ++step) {
+    // for each value
+    for (unsigned i{0}; i < N; ++i) {
+      i64 const value{val[i]};
+      // find the front of the range
+      unsigned const front{index_of(i, id, N)};
+      // find the tail of the range
+      unsigned tail = fast_mod(static_cast<unsigned>(front + N + fast_mod(value, N - 1)), N);
+      if (tail > front) {
+        // we will have to shift left one
+        if (value < 0) {
+          // decrement the end of the range if our value is negative
+          --tail;
+        }
+        unsigned *const begin{base + front + 1};
+        unsigned const count{tail - front};
+        ::memmove(begin - 1, begin, count * sizeof(unsigned));
+      } else if (tail < front) {
+        // we will have to shift right one
+        if (value > 0) {
+          // increment the beginning of the range if our value is positive
+          ++tail;
+        }
+        unsigned *const begin{base + tail};
+        unsigned const count{front - tail};
+        ::memmove(begin + 1, begin, count * sizeof(unsigned));
+      }
+      id[tail] = i;
+    }
   }
-  return from;
-}
-
-constexpr inline u32
-next(u32 from, typename day20::list_type &list, u32 amount) noexcept {
-  for (u32 i{0}; i < amount; ++i) {
-    from = list[from].next;
-  }
-  return from;
+  unsigned const zero{index_of(zero_index, id, N)};
+  return val[id[fast_mod(zero + 1000u, N)]] + val[id[fast_mod(zero + 2000u, N)]] + val[id[fast_mod(zero + 3000u, N)]];
 }
 
 } // namespace
 
 PARSE_IMPL(Day20, view) {
-  typename day20::list_type numbers;
+  typename day20::list_type<i64> numbers;
   u32 zero_index;
   u32 idx{0};
   for (usize off{0}; off < std::size(view);) {
-    i64 val;
+    i32 val;
     off += parse<"\0\n">(view.substr(off), val);
     if (val == 0) {
       zero_index = idx;
     }
-    numbers.push({val, idx - 1, idx + 1});
+    numbers.push(val);
     ++idx;
   }
-  std::begin(numbers)->prev = std::size(numbers) - 1;
-  std::rbegin(numbers)->next = 0;
   return {numbers, zero_index};
 }
 
 SOLVE_IMPL(Day20, Part2, state, part1_answer) {
-  auto const &nums{state.list};
-  u32 const zero_index{state.zero_index};
-  day20::list_type list(std::size(nums));
-  std::transform(std::begin(nums), std::end(nums), std::begin(list), [](day20::node n) {
-    if constexpr (Part2) {
-      n.value *= 811'589'153;
-    }
-    return n;
-  });
+  auto const &nums{state.numbers};
+  unsigned const zero_index{state.zero_index};
 
-  u32 const size{std::size(list)};
-
-  for (u32 iters{0}; iters < (Part2 ? 10 : 1); ++iters) {
-    for (u32 idx{0}; idx < size; ++idx) {
-      auto const value{list[idx].value};
-      u32 new_loc{-1u};
-      if (i32 const skip{fast_rem(value, size - 1)}; skip < 0) {
-        new_loc = prev(idx, list, static_cast<u32>(1 - skip));
-      } else {
-        new_loc = next(idx, list, static_cast<u32>(skip));
-      }
-      if (new_loc != idx) {
-        unhook(idx, list);
-        hook_after(idx, list, new_loc);
-      }
-    }
+  if constexpr (not Part2) {
+    return run<1>(nums, zero_index);
+  } else {
+    owning_span<i64, day20::MAXN> numbers(std::size(nums));
+    std::transform(std::begin(nums), std::end(nums), std::begin(numbers), [](i32 val) {
+      return 811'589'153l * val;
+    });
+    return run<10>(numbers, zero_index);
   }
-
-  u32 const one{next(zero_index, list, 1000)};
-  u32 const two{next(one, list, 1000)};
-  u32 const three{next(two, list, 1000)};
-
-  return list[one].value + list[two].value + list[three].value;
 }
 
 INSTANTIATE(Day20);
