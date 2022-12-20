@@ -29,7 +29,7 @@ PARSE_IMPL(Day16, view) {
   };
 
   // by line
-  for (u32 off{6}; off < std::size(view); off += 6) {
+  for (usize off{6}; off < std::size(view); off += 6) {
     T const valve_id{get_id(id_map, view[off], view[off + 1])};
     off += 17;
     T rate{static_cast<T>(view[off] - '0')};

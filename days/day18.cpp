@@ -32,7 +32,7 @@ constexpr auto const DELTAS = std::array{std::array{-1, 0, 0},
 PARSE_IMPL(Day18, view) {
   using day18::MAX_DIM;
   day18::grid_type grid(MAX_DIM * MAX_DIM * MAX_DIM, 0u);
-  for (u32 off{0}; off < std::size(view);) {
+  for (usize off{0}; off < std::size(view);) {
     i32 x, y, z;
     off += parse<"\0,\1,\2\n">(view.substr(off), x, y, z);
     // offset placement by 1 in each dimension

@@ -62,7 +62,7 @@ PARSE_IMPL(Day19, view) {
                               "Each obsidian robot costs \3 ore and \4 clay. "
                               "Each geode robot costs \5 ore and \6 obsidian.\n"};
 
-  for (u32 off{0}; off < std::size(view);) {
+  for (usize off{0}; off < std::size(view);) {
     day19::blueprint curr;
     std::fill_n(std::addressof(curr[0][0]), std::size(curr) * std::size(curr[0]), 0);
     [[maybe_unused]] u32 id; // swallow the id and never use it again
