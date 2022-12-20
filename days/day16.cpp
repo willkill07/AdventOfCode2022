@@ -1,7 +1,9 @@
-#include "days/day16.hpp"
-#include "parsing.hpp"
-
 #include <algorithm>
+#include <functional>
+
+#include "days/day16.hpp"
+#include "owning_span.hpp"
+#include "parsing.hpp"
 
 PARSE_IMPL(Day16, view) {
 
@@ -125,20 +127,44 @@ SOLVE_IMPL(Day16, Part2, data, unused_part1) {
 
   visit(dp, data.flow, data.dist, start, time, mask, 0);
 
-  if constexpr (Part2) {
-    i32 max{0};
-    // the dynamic schedule here is important since we are doing upper-triangular
-#pragma omp parallel for reduction(max : max) schedule(dynamic)
-    for (u32 m1 = 0; m1 < std::size(dp); ++m1) {
-      for (u32 m2 = m1 + 1; m2 < std::size(dp); ++m2) {
-        if (not(m1 & m2)) {
-          max = std::max(max, dp[m1] + dp[m2]);
+  if constexpr (not Part2) {
+
+    return *std::max_element(std::begin(dp), std::end(dp));
+
+  } else {
+
+    struct pair {
+      i32 val;
+      u32 idx;
+      constexpr inline auto operator<=>(pair const &) const = default;
+    };
+
+    // construct a list of filtered scores zipped with their index
+    owning_span<pair, (1 << MAXN)> filtered;
+    for (u32 i{0}; auto v : dp) {
+      if (v > 0) {
+        filtered.push({v, i});
+      }
+      ++i;
+    }
+
+    // descending sort
+    std::sort(std::begin(filtered), std::end(filtered), std::greater<>{});
+
+    i32 best{0};
+    for (u32 i{0}; auto const [hv, hi] : filtered) {
+      for (u32 j{i + 1}; j < std::size(filtered); ++j) {
+        auto const [ev, ei] = filtered[j];
+        if (i32 const score{hv + ev}; score < best) {
+          break;
+        } else if (not(hi & ei)) {
+          best = score;
+          break;
         }
       }
+      ++i;
     }
-    return max;
-  } else {
-    return *std::max_element(std::begin(dp), std::end(dp));
+    return best;
   }
 }
 

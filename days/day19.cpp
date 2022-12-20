@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <numeric>
 #include <thread>
 #include <utility>
 
@@ -80,10 +81,9 @@ PARSE_IMPL(Day19, view) {
 
 SOLVE_IMPL(Day19, Part2, blueprints, part1_answer) {
 
-  u32 const upper{Part2 ? 3 : std::size(blueprints)};
+  u32 const upper{Part2 ? std::min(std::size(blueprints), 3u) : std::size(blueprints)};
 
   owning_span<u32, 30> scores(upper, 0u);
-
   {
     owning_span<std::jthread, 30> threads;
     for (u32 i{0u}; i < upper; ++i) {
@@ -138,13 +138,11 @@ SOLVE_IMPL(Day19, Part2, blueprints, part1_answer) {
   }
 
   if constexpr (Part2) {
-    return scores[0] * scores[1] * scores[2];
+    return std::accumulate(std::begin(scores), std::begin(scores) + upper, 1u, std::multiplies<>{});
   } else {
-    u32 score{0};
-    for (u32 i{0}; auto &&s : scores) {
-      score += ++i * s;
-    }
-    return score;
+    return std::accumulate(std::begin(scores), std::end(scores), 0u, [i = 0u](u32 acc, u32 s) mutable noexcept {
+      return acc + (++i * s);
+    });
   }
 }
 
@@ -156,4 +154,4 @@ Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsid
 Blueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.
 )"sv.substr(1),
                  33,
-                 0)
+                 3472)
