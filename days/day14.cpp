@@ -126,7 +126,7 @@ PART2_IMPL(Day14, data, part1_answer) {
   auto const left_tri = (left * (left + 1) / 2);
   auto const right_tri = (right * (right + 1) / 2);
 
-  return placed + static_cast<u32>(left_tri + right_tri);
+  return placed + as<u32>(left_tri + right_tri);
 }
 
 INSTANTIATE_TEST(Day14,

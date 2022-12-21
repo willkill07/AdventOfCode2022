@@ -122,8 +122,8 @@ structure::List() noexcept {
   // copy list elements to list location in "heap"
   std::move(std::begin(elems), std::begin(elems) + count, std::begin(heap) + brk);
   // return location of list
-  i16 const result{static_cast<i16>(-brk)};
-  brk = static_cast<type>(brk + static_cast<type>(count));
+  i16 const result{as<i16>(-brk)};
+  brk = as<type>(brk + as<type>(count));
   return result;
 }
 
@@ -134,9 +134,9 @@ structure::Elem() noexcept {
   if (*ptr == '[') {
     // list
     return List();
-  } else if (type const val(static_cast<type>(*ptr++ - '0')); *ptr >= '0' and *ptr <= '9') {
+  } else if (type const val(as<type>(*ptr++ - '0')); *ptr >= '0' and *ptr <= '9') {
     // two digit number
-    return {static_cast<type>((val * 10) + (*ptr++ - '0'))};
+    return {as<type>((val * 10) + (*ptr++ - '0'))};
   } else {
     // single digit
     return handle{val};

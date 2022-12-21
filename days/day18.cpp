@@ -7,17 +7,17 @@ namespace {
 constexpr inline u32
 index(i32 x, i32 y, i32 z) noexcept {
   using day18::MAX_DIM;
-  return MAX_DIM * MAX_DIM * static_cast<u32>(z) + MAX_DIM * static_cast<u32>(y) + static_cast<u32>(x);
+  return MAX_DIM * MAX_DIM * as<u32>(z) + MAX_DIM * as<u32>(y) + as<u32>(x);
 }
 
 constexpr inline u32
 pack(i32 x, i32 y, i32 z) noexcept {
-  return static_cast<u32>((x << 16) | (y << 8) | z);
+  return as<u32>((x << 16) | (y << 8) | z);
 }
 
 constexpr inline auto
 unpack(u32 v) noexcept {
-  return std::tuple(static_cast<i32>((v >> 16) & 0xFF), static_cast<i32>((v >> 8) & 0xFF), static_cast<i32>(v & 0xFF));
+  return std::tuple(as<i32>((v >> 16) & 0xFF), as<i32>((v >> 8) & 0xFF), as<i32>(v & 0xFF));
 }
 
 constexpr auto const DELTAS = std::array{std::array{-1, 0, 0},
@@ -44,7 +44,7 @@ PARSE_IMPL(Day18, view) {
 PART1_IMPL(Day18, grid) {
   using day18::MAX_DIM;
   constexpr i32 const lower{1};
-  constexpr i32 const limit{static_cast<i32>(MAX_DIM) - 1};
+  constexpr i32 const limit{as<i32>(MAX_DIM) - 1};
 
   u32 voxels{0}, shared{0};
 
@@ -72,7 +72,7 @@ PART2_IMPL(Day18, grid, part1_answer) {
   owning_span<u32, Cubed> frontier;
   auto front = std::cbegin(frontier);
   auto back = std::begin(frontier);
-  constexpr i32 const limit{static_cast<i32>(MAX_DIM) - 1};
+  constexpr i32 const limit{as<i32>(MAX_DIM) - 1};
 
   *back++ = pack(0, 0, 0);
   seen[index(0, 0, 0)] = true;

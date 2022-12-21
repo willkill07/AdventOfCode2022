@@ -25,7 +25,7 @@ template <op_type Op>
 [[nodiscard, gnu::always_inline]] inline constexpr auto
 new_value(u32 old, u32 rhs) noexcept {
   if constexpr (Op == op_type::squares) {
-    return static_cast<u64>(old) * static_cast<u64>(old);
+    return as<u64>(old) * as<u64>(old);
   } else if constexpr (Op == op_type::plus) {
     return old + rhs;
   } else {
@@ -38,12 +38,12 @@ template <bool Part2, typename U>
 update(U res) noexcept {
   if constexpr (Part2) {
     if (res > bigmod<U>) [[unlikely]] {
-      return static_cast<u32>(res % bigmod<U>);
+      return as<u32>(res % bigmod<U>);
     } else {
-      return static_cast<u32>(res);
+      return as<u32>(res);
     }
   } else {
-    return static_cast<u32>(res / U{3});
+    return as<u32>(res / U{3});
   }
 }
 

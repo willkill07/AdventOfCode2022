@@ -92,7 +92,7 @@ struct letter {
         return '?';
       }
     } else {
-      return static_cast<T>(value);
+      return as<T>(value);
     }
   }
 

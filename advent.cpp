@@ -164,7 +164,7 @@ main(int argc, char **argv) {
     case -1:
       goto option_parsing_done;
     case 'd': {
-      u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
+      u32 const value = as<u32>(strtoul(optarg, NULL, 10));
       if (value == 0 || value > implemented_days) {
         fprintf(stderr, "Option -%c requires day to be implemented.\n", curr_opt);
         error = true;
@@ -174,7 +174,7 @@ main(int argc, char **argv) {
       break;
     }
     case 'p':
-      options.precision = static_cast<u32>(atoi(optarg));
+      options.precision = as<u32>(atoi(optarg));
       break;
     case '1':
       options.part2 = false;
@@ -195,7 +195,7 @@ main(int argc, char **argv) {
       options.mask = true;
       break;
     case 'b': {
-      u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
+      u32 const value = as<u32>(strtoul(optarg, NULL, 10));
       if (value == 0) {
         fprintf(stderr, "Option -%c requires value to be positive and non-zero.\n", curr_opt);
         error = true;
@@ -217,7 +217,7 @@ main(int argc, char **argv) {
       options.graphs = true;
       break;
     case 'w': {
-      u32 const value = static_cast<u32>(strtoul(optarg, NULL, 10));
+      u32 const value = as<u32>(strtoul(optarg, NULL, 10));
       if (value == 0) {
         fprintf(stderr, "Option -%c requires value to be positive and non-zero.\n", curr_opt);
         error = true;

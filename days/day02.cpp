@@ -16,7 +16,7 @@ make_cost_table() noexcept {
 PARSE_IMPL(Day02, view) {
   day02::lookup_table_t counts{};
   for (usize idx{0}; idx < std::size(view); idx += 4) {
-    ++counts[static_cast<u32>(view[idx] - 'A') * day02::options + static_cast<u32>(view[idx + 2] - 'X')];
+    ++counts[as<u32>(view[idx] - 'A') * day02::options + as<u32>(view[idx + 2] - 'X')];
   }
   return counts;
 }

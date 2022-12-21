@@ -16,7 +16,7 @@ PARSE_IMPL(Day04, view) {
 
 SOLVE_IMPL(Day04, Part2, ranges, part1_answer) {
   return std::accumulate(std::begin(ranges), std::end(ranges), 0u, [](u32 sum, day04::range const &r) {
-    return sum + static_cast<u32>(Part2 ? r.overlaps() : r.encloses());
+    return sum + as<u32>(Part2 ? r.overlaps() : r.encloses());
   });
 }
 

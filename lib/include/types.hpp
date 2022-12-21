@@ -19,3 +19,13 @@ using constant_t = std::integral_constant<decltype(V), V>;
 
 template <auto V>
 inline constexpr constant_t<V> constant{};
+
+template <typename To, typename From>
+[[nodiscard]] constexpr inline To as(From const& from) noexcept {
+    return static_cast<To>(from);
+}
+
+template <typename To, typename From>
+[[nodiscard]] constexpr inline To as(From&& from) noexcept {
+    return static_cast<To>(from);
+}

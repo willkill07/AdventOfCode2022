@@ -14,7 +14,7 @@ template <typename T>
 using format_function_t = fmt::detail::styled_arg<std::remove_cvref_t<T>> (*)(T) noexcept;
 
 // singleton static flag for fast (done-once TTY detection)
-inline bool const is_a_tty{static_cast<bool>(isatty(STDOUT_FILENO))};
+inline bool const is_a_tty{as<bool>(isatty(STDOUT_FILENO))};
 
 template <fmt::emphasis... Emphs>
 fmt::detail::styled_arg<std::string>

@@ -29,7 +29,7 @@ PARSE_IMPL(Day15, view) {
 
 PART1_IMPL(Day15, data) {
   i32 const target_row = (data.size() <= 15 ? 10 : 2'000'000);
-  owning_span<mark, static_cast<u32>(day15::MAX_ENTRIES * 2U)> marks;
+  owning_span<mark, as<u32>(day15::MAX_ENTRIES * 2U)> marks;
   for (auto &&[s, b] : data) {
     i32 const units_away{s.manhattan(b) - std::abs(target_row - s.y)};
     if (units_away >= 0) {
@@ -72,7 +72,7 @@ template <std::random_access_iterator Iter>
 constexpr inline u32
 filter_unique(Iter begin, Iter end) noexcept {
   std::sort(begin, end);
-  return static_cast<u32>(std::distance(begin, std::unique(begin, end)));
+  return as<u32>(std::distance(begin, std::unique(begin, end)));
 }
 
 } // namespace

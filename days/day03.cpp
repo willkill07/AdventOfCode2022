@@ -9,7 +9,7 @@ namespace {
 [[gnu::always_inline, nodiscard]] inline u64
 hash(std::string_view s) noexcept {
   return std::accumulate(std::begin(s), std::end(s), 0LU, [](u64 hash, char c) noexcept {
-    auto const offset = static_cast<u32>(c - (c >= 'a' ? 'a' : 'A' - 26));
+    auto const offset = as<u32>(c - (c >= 'a' ? 'a' : 'A' - 26));
     return hash | (1LU << offset);
   });
 }

@@ -12,7 +12,7 @@ file_backed_buffer::file_backed_buffer(std::string const &filename) noexcept
         if (res < 0) {
           return usize{0};
         } else {
-          return static_cast<usize>(st.st_size);
+          return as<usize>(st.st_size);
         }
       }(filename)),
       file_desc([](std::string const &file) noexcept -> int {

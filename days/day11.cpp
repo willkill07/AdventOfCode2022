@@ -18,7 +18,7 @@ PARSE_IMPL(Day11, view) {
     // we have a value!
     while (view[off] != ' ') {
       // do this manually for speed
-      items.push(static_cast<u32>(view[off] - '0') * 10u + static_cast<u32>(view[off + 1] - '0'));
+      items.push(as<u32>(view[off] - '0') * 10u + as<u32>(view[off + 1] - '0'));
       off += 4;
     }
 
@@ -47,9 +47,9 @@ PARSE_IMPL(Day11, view) {
     u8 div;
     off += parse<"\0\n">(view.substr(off), div);
     off = view.find_first_of('y', off) + 2;
-    u8 if_true = static_cast<u8>(view[off] - '0');
+    u8 if_true = as<u8>(view[off] - '0');
     off = view.find_first_of('y', off) + 2;
-    u8 if_false = static_cast<u8>(view[off] - '0');
+    u8 if_false = as<u8>(view[off] - '0');
     off += 3;
 
     monkeys.push({items, op, div, if_true, if_false});

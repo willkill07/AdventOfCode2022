@@ -23,7 +23,7 @@ PARSE_IMPL(Day05, view) {
   day05::state state;
 
   // determine number of stacks by looking at line length
-  u32 const num_stacks{static_cast<u32>(view.find_first_of('\n') + 1) / 4};
+  u32 const num_stacks{as<u32>(view.find_first_of('\n') + 1) / 4};
 
   // create stacks
   state.stacks.resize(num_stacks);

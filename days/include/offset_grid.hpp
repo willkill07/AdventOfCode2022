@@ -23,15 +23,15 @@ struct offset_grid {
         m_height{y_max - y_min + 1},
         m_xmin{x_min},
         m_ymin{y_min},
-        m_data(static_cast<u32>(m_width) * static_cast<u32>(m_height), 0) {
+        m_data(as<u32>(m_width) * as<u32>(m_height), 0) {
   }
 
   constexpr inline reference operator()(i32 x, i32 y) noexcept {
-    return m_data[static_cast<u32>(m_width * (y - m_ymin) + (x - m_xmin))];
+    return m_data[as<u32>(m_width * (y - m_ymin) + (x - m_xmin))];
   }
 
   constexpr inline const_reference operator()(i32 x, i32 y) const noexcept {
-    return m_data[static_cast<u32>(m_width * (y - m_ymin) + (x - m_xmin))];
+    return m_data[as<u32>(m_width * (y - m_ymin) + (x - m_xmin))];
   }
 
   constexpr inline reference operator()(point2d const &p) noexcept {
@@ -95,11 +95,11 @@ struct offset_grid {
   }
 
   [[nodiscard]] constexpr inline u32 width() const noexcept {
-    return static_cast<u32>(m_width);
+    return as<u32>(m_width);
   }
 
   [[nodiscard]] constexpr inline u32 height() const noexcept {
-    return static_cast<u32>(m_height);
+    return as<u32>(m_height);
   }
 
   [[nodiscard]] constexpr inline std::string_view row(u32 row_num) const noexcept requires std::same_as<T, char> {

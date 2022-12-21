@@ -33,7 +33,7 @@ time_until_available(auto const &cost_of_robot, auto const &resources_available,
       }
     }
   }
-  return static_cast<u32>(max_time);
+  return as<u32>(max_time);
 }
 
 [[nodiscard]] constexpr inline day19::robot
@@ -111,10 +111,10 @@ SOLVE_IMPL(Day19, Part2, blueprints, part1_answer) {
                 if (u32 const wait{time_until_available(blueprint[robot_idx], resources, robots) + 1u}; time > wait) {
                   // evolve resources
                   std::array<u8, 4> const next_resources{
-                      static_cast<u8>(resources[Ore] + robots[Ore] * wait - blueprint[robot_idx][Ore]),
-                      static_cast<u8>(resources[Clay] + robots[Clay] * wait - blueprint[robot_idx][Clay]),
-                      static_cast<u8>(resources[Obsidian] + robots[Obsidian] * wait - blueprint[robot_idx][Obsidian]),
-                      static_cast<u8>(resources[Geode] + robots[Geode] * wait)};
+                      as<u8>(resources[Ore] + robots[Ore] * wait - blueprint[robot_idx][Ore]),
+                      as<u8>(resources[Clay] + robots[Clay] * wait - blueprint[robot_idx][Clay]),
+                      as<u8>(resources[Obsidian] + robots[Obsidian] * wait - blueprint[robot_idx][Obsidian]),
+                      as<u8>(resources[Geode] + robots[Geode] * wait)};
                   // update robot count
                   std::array<u8, 4> next_robots{robots};
                   ++next_robots[robot_idx];

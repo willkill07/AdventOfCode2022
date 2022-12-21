@@ -6,7 +6,7 @@
 #include "parsing.hpp"
 
 PARSE_IMPL(Day06, view) {
-  typename day06::buffer_t mapped(static_cast<u32>(std::size(view)) - 1);
+  typename day06::buffer_t mapped(as<u32>(std::size(view)) - 1);
   std::transform(std::begin(view), std::end(view) - 1, std::begin(mapped), [](char c) {
     return c - 'a';
   });

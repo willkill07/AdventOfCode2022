@@ -5,12 +5,12 @@
 
 PARSE_IMPL(Day08, view) {
 
-  u32 const dim = static_cast<u32>(view.find_first_of('\n'));
+  u32 const dim = as<u32>(view.find_first_of('\n'));
   u32 const end = dim - 1;
 
   typename day08::grid_t grid(dim);
   for (u32 row{0}; row < dim; ++row) {
-    grid[row] = view.substr(static_cast<u32>(row * (dim + 1)), dim);
+    grid[row] = view.substr(as<u32>(row * (dim + 1)), dim);
   }
 
   typename day08::visible_t visible(dim * dim, 0u);

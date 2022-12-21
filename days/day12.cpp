@@ -1,10 +1,10 @@
 #include "days/day12.hpp"
 
 PARSE_IMPL(Day12, view) {
-  u32 const width = static_cast<u32>(view.find_first_of('\n') + 1);
-  u32 const height = static_cast<u32>(view.size() / width);
-  u32 const start = static_cast<u32>(view.find_first_of('S'));
-  u32 const stop = static_cast<u32>(view.find_first_of('E', start));
+  u32 const width = as<u32>(view.find_first_of('\n') + 1);
+  u32 const height = as<u32>(view.size() / width);
+  u32 const start = as<u32>(view.find_first_of('S'));
+  u32 const stop = as<u32>(view.find_first_of('E', start));
   owning_span<char, day12::MAX_SIZE> grid;
   grid.push(std::begin(view), std::end(view));
   grid[start] = 'a';

@@ -19,12 +19,12 @@ PARSE_IMPL(Day16, view) {
   typename day16::matrix_t dist(day16::MAX_VALVES * day16::MAX_VALVES, std::numeric_limits<u16>::max());
 
   auto get_id = [](auto &map, char a, char b) {
-    T const val{static_cast<T>(a << 8 | b)};
+    T const val{as<T>(a << 8 | b)};
     if (auto iter = std::find(std::begin(map), std::end(map), val); iter == std::end(map)) {
       map.push(val);
-      return static_cast<T>(std::size(map) - 1);
+      return as<T>(std::size(map) - 1);
     } else {
-      return static_cast<T>(std::distance(std::begin(map), iter));
+      return as<T>(std::distance(std::begin(map), iter));
     }
   };
 
@@ -32,10 +32,10 @@ PARSE_IMPL(Day16, view) {
   for (usize off{6}; off < std::size(view); off += 6) {
     T const valve_id{get_id(id_map, view[off], view[off + 1])};
     off += 17;
-    T rate{static_cast<T>(view[off] - '0')};
+    T rate{as<T>(view[off] - '0')};
     if (view[off + 1] != ';') {
       ++off;
-      rate = static_cast<T>(10 * rate) + static_cast<T>(view[off] - '0');
+      rate = as<T>(10 * rate) + as<T>(view[off] - '0');
     }
     if (rate > 0) {
       with_flow.push(valve_id);
@@ -48,7 +48,7 @@ PARSE_IMPL(Day16, view) {
     while (view[off] == ' ') {
       ++off;
       T const adj{get_id(id_map, view[off], view[off + 1])};
-      dist[static_cast<u32>(day16::MAX_VALVES * valve_id + adj)] = 1;
+      dist[as<u32>(day16::MAX_VALVES * valve_id + adj)] = 1;
       off += 3;
     }
   }
@@ -64,7 +64,7 @@ PARSE_IMPL(Day16, view) {
       for (u32 j{0}; j < day16::MAX_VALVES; ++j) {
         dist[day16::MAX_VALVES * i + j] =
             std::min(dist[day16::MAX_VALVES * i + j],
-                     static_cast<T>(dist[day16::MAX_VALVES * i + k] + dist[day16::MAX_VALVES * k + j]));
+                     as<T>(dist[day16::MAX_VALVES * i + k] + dist[day16::MAX_VALVES * k + j]));
       }
     }
   }
@@ -76,14 +76,14 @@ PARSE_IMPL(Day16, view) {
   typename day16::compact_matrix_t connected;
   for (auto &&src : with_flow) {
     for (auto &&dst : with_flow) {
-      connected.push(dist[static_cast<u32>(day16::MAX_VALVES * src + dst)]);
+      connected.push(dist[as<u32>(day16::MAX_VALVES * src + dst)]);
     }
-    connected.push(dist[static_cast<u32>(day16::MAX_VALVES * src + AA)]);
+    connected.push(dist[as<u32>(day16::MAX_VALVES * src + AA)]);
   }
   for (auto &&dst : with_flow) {
-    connected.push(dist[static_cast<u32>(day16::MAX_VALVES * AA + dst)]);
+    connected.push(dist[as<u32>(day16::MAX_VALVES * AA + dst)]);
   }
-  connected.push(dist[static_cast<u32>(day16::MAX_VALVES * AA + AA)]);
+  connected.push(dist[as<u32>(day16::MAX_VALVES * AA + AA)]);
 
   return {flow_amount, connected};
 }

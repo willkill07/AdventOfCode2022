@@ -18,7 +18,7 @@ static constexpr auto const faint_red{fmt::fg(fmt::terminal_color::red) | fmt::e
 static constexpr auto const faint_yellow{fmt::fg(fmt::terminal_color::yellow) | fmt::emphasis::faint};
 static constexpr auto const faint_green{fmt::fg(fmt::terminal_color::green) | fmt::emphasis::faint};
 
-inline bool const is_a_tty{static_cast<bool>(usize(STDOUT_FILENO))};
+inline bool const is_a_tty{as<bool>(usize(STDOUT_FILENO))};
 
 fmt::text_style
 style(fmt::text_style s, bool flag) {

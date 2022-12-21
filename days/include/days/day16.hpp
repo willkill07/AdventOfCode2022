@@ -7,10 +7,10 @@ using T = i32;
 constexpr T const MAX_VALVES{55};
 constexpr T const MAX_WORKING_VALVES{16};
 
-using matrix_t = owning_span<T, static_cast<u32>(MAX_VALVES * MAX_VALVES)>;
+using matrix_t = owning_span<T, as<u32>(MAX_VALVES * MAX_VALVES)>;
 using vector_t = owning_span<T, MAX_VALVES>;
 
-using compact_matrix_t = owning_span<T, static_cast<u32>(MAX_WORKING_VALVES * MAX_WORKING_VALVES)>;
+using compact_matrix_t = owning_span<T, as<u32>(MAX_WORKING_VALVES * MAX_WORKING_VALVES)>;
 using compact_vector_t = owning_span<T, MAX_WORKING_VALVES>;
 
 struct result_t {

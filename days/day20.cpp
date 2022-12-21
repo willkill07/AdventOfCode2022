@@ -51,7 +51,7 @@ run(day20::list_type<i64> const &val, unsigned zero_index) noexcept {
       // find the front of the range
       unsigned const front{index_of(i, id, N)};
       // find the tail of the range
-      unsigned tail = fast_mod(static_cast<unsigned>(front + N + fast_mod(value, N - 1)), N);
+      unsigned tail = fast_mod(as<unsigned>(front + N + fast_mod(value, N - 1)), N);
       if (tail > front) {
         // we will have to shift left one
         if (value < 0) {

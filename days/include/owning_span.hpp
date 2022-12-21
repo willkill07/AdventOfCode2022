@@ -47,7 +47,7 @@ struct owning_span {
   template <std::input_iterator I>
   constexpr inline void push(I begin, I end) noexcept {
     std::copy(begin, end, std::end(span()));
-    m_size += static_cast<u32>(std::distance(begin, end));
+    m_size += as<u32>(std::distance(begin, end));
   }
 
   template <std::input_iterator I>
