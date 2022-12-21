@@ -2,6 +2,7 @@
 #include <limits>
 #include <variant>
 
+#include "days/day.hpp"
 #include "days/day21.hpp"
 #include "parsing.hpp"
 
@@ -42,10 +43,13 @@ evaluate(day21::list_type<day21::expr_node> const &nodes, u32 id) noexcept {
 
 constexpr inline void
 simplify(day21::list_type<day21::expr_node> &nodes, day21::expr_node &node) noexcept {
+  // only simplify if we are an operation
   if (std::holds_alternative<day21::op_node>(node)) {
     auto const &tree{std::get<day21::op_node>(node)};
+    // recursively simplify
     simplify(nodes, nodes[tree.lhs]);
     simplify(nodes, nodes[tree.rhs]);
+    // constant fold
     if (std::holds_alternative<day21::value_node>(nodes[tree.lhs]) and
         std::holds_alternative<day21::value_node>(nodes[tree.rhs])) {
       auto const lhs{std::get<day21::value_node>(nodes[tree.lhs])};
@@ -72,17 +76,26 @@ simplify(day21::list_type<day21::expr_node> &nodes, day21::expr_node &node) noex
 
 constexpr inline i64
 symbolic_solve(day21::list_type<day21::expr_node> &numbers, u32 idx) noexcept {
+
+  // simplify the tree
+  simplify(numbers, numbers[idx]);
+
   auto const &tree_node = std::get<day21::op_node>(numbers[idx]);
   auto const lhs_idx{tree_node.lhs};
   auto const rhs_idx{tree_node.rhs};
   bool value_on_lhs{std::holds_alternative<day21::value_node>(numbers[lhs_idx])};
+  // target value from one side of the '='
   i64 value{std::get<day21::value_node>(numbers[value_on_lhs ? lhs_idx : rhs_idx])};
+  // index to start tree traversal for simplifying / solving
   idx = (value_on_lhs ? rhs_idx : lhs_idx);
 
+  // while we have not seen the symbol
   while (not numbers[idx].valueless_by_exception()) {
     auto const tree{std::get<day21::op_node>(numbers[idx])};
     value_on_lhs = std::holds_alternative<day21::value_node>(numbers[tree.lhs]);
+    // grab the paired value with the subexpression
     auto const paired{std::get<day21::value_node>(numbers[value_on_lhs ? tree.lhs : tree.rhs])};
+    // and update the value
     switch (tree.op) {
     case '+':
       value = value - paired;
@@ -99,6 +112,7 @@ symbolic_solve(day21::list_type<day21::expr_node> &numbers, u32 idx) noexcept {
     default:
       __builtin_unreachable();
     }
+    // update the index to traverse "down" the tree
     idx = value_on_lhs ? tree.rhs : tree.lhs;
   }
   return value;
@@ -185,16 +199,20 @@ PARSE_IMPL(Day21, view) {
   return {cleaned, root_idx, humn_idx};
 }
 
-PART1_IMPL(Day21, data) {
-  return evaluate(data.numbers, data.root);
+SOLVE_IMPL(Day21, Part2, data, part1_answer) {
+  if constexpr (not Part2) {
+    return evaluate(data.numbers, data.root);
+  } else {
+    // make a mutable copy
+    auto numbers{data.numbers};
+    // set the human to be a default expr_node (symbol)
+    numbers[data.humn] = day21::expr_node{};
+    // symbolicly solve for "X" from root
+    return symbolic_solve(numbers, data.root);
+  }
 }
 
-PART2_IMPL(Day21, data, part1_answer) {
-  auto numbers{data.numbers};
-  numbers[data.humn] = day21::expr_node{};
-  simplify(numbers, numbers[data.root]);
-  return symbolic_solve(numbers, data.root);
-}
+INSTANTIATE(Day21);
 
 INSTANTIATE_TEST(Day21,
                  R"(
