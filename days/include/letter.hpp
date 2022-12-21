@@ -97,7 +97,7 @@ struct letter {
   }
 
 private:
-  constexpr inline u32 get_bit_mask(u8 r, u8 c) const noexcept {
+  [[nodiscard]] constexpr inline u32 get_bit_mask(u8 r, u8 c) const noexcept {
     return 1u << (r * width + c);
   }
 

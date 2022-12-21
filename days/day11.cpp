@@ -52,7 +52,7 @@ PARSE_IMPL(Day11, view) {
     u8 if_false = static_cast<u8>(view[off] - '0');
     off += 3;
 
-    monkeys.push({std::move(items), op, div, if_true, if_false});
+    monkeys.push({items, op, div, if_true, if_false});
   }
 
   return monkeys;
@@ -74,7 +74,7 @@ SOLVE_IMPL(Day11, Part2, original, part1_answer) {
   }
 
   u32 const count{std::size(monkeys)};
-  owning_span<u64, day11::MAX_MONKEYS> throws(count, 0lu);
+  owning_span<u64, day11::MAX_MONKEYS> throws(count, 0LU);
   for (u32 midx{0}; midx < std::size(throws); ++midx) {
     throws[midx] = monkeys[midx].count();
   }
@@ -115,5 +115,5 @@ Monkey 3:
     If true: throw to monkey 0
     If false: throw to monkey 1
 )"sv.substr(1),
-                 10605lu,
-                 2713310158lu)
+                 10605LU,
+                 2713310158LU)

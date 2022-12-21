@@ -61,15 +61,15 @@ struct point2d {
     return point2d{x / v, y / v};
   }
 
-  constexpr inline point2d sgn() const noexcept {
+  [[nodiscard]] constexpr inline point2d sgn() const noexcept {
     return point2d{(x > 0) - (x < 0), (y > 0) - (y < 0)};
   }
 
-  constexpr inline i32 abs() const noexcept {
+  [[nodiscard]] constexpr inline i32 abs() const noexcept {
     return std::abs(x) + std::abs(y);
   }
 
-  constexpr inline i32 manhattan(point2d const &o) const noexcept {
+  [[nodiscard]] constexpr inline i32 manhattan(point2d const &o) const noexcept {
     return (*this - o).abs();
   }
 

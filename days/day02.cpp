@@ -22,7 +22,7 @@ PARSE_IMPL(Day02, view) {
 }
 
 SOLVE_IMPL(Day02, Part2, parse_result, part1_answer) {
-  return std::inner_product(std::begin(parse_result), std::end(parse_result), std::begin(make_cost_table<Part2>()), 0);
+  return std::inner_product(std::begin(parse_result), std::end(parse_result), std::begin(make_cost_table<Part2>()), 0U);
 }
 
 INSTANTIATE(Day02);
@@ -33,5 +33,5 @@ A Y
 B X
 C Z
 )"sv.substr(1),
-                 15,
-                 12)
+                 15U,
+                 12U)

@@ -18,7 +18,7 @@ inline bool const is_a_tty{static_cast<bool>(isatty(STDOUT_FILENO))};
 
 template <fmt::emphasis... Emphs>
 fmt::detail::styled_arg<std::string>
-print_plain(std::string v) noexcept {
+print_plain(std::string const& v) noexcept {
   fmt::text_style style{};
   if (is_a_tty) {
     style = (style | ... | fmt::text_style{Emphs});
@@ -28,7 +28,7 @@ print_plain(std::string v) noexcept {
 
 template <fmt::detail::color_type Color, fmt::emphasis... Emphs>
 fmt::detail::styled_arg<std::string>
-print(std::string v) noexcept {
+print(std::string const& v) noexcept {
   fmt::text_style style{};
   if (is_a_tty) {
     style = (fmt::fg(Color) | ... | fmt::text_style{Emphs});
@@ -59,8 +59,8 @@ inline constexpr auto faint_cyan = &print<fmt::terminal_color::cyan, fmt::emphas
 } // namespace colors
 
 template <usize Width>
-inline std::array<format_function_t<std::string>, Width>
-maybe_plain(bool color_condition, std::array<format_function_t<std::string>, Width> arr) noexcept {
+inline std::array<format_function_t<std::string const&>, Width>
+maybe_plain(bool color_condition, std::array<format_function_t<std::string const&>, Width> arr) noexcept {
   if (not color_condition) {
     arr.fill(colors::plain);
   }
@@ -100,7 +100,7 @@ template <fixed_string S,
 void
 print_data_row(std::array<T, Data> const &data,
                std::array<usize, Width> const &widths,
-               std::array<format_function_t<std::string>, Style> const &stylizers) noexcept {
+               std::array<format_function_t<std::string const&>, Style> const &stylizers) noexcept {
   constexpr usize const elements = (String.size() - 1) / 2;
   static_assert((String.size() & 1) == 1, "table format string must have odd length");
   static_assert(String.size() > 2, "table format string must be at least 3");

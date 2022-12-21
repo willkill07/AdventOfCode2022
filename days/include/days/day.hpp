@@ -27,15 +27,16 @@ struct Day {
     return solve<false>(parsed, {});
   }
 
-  [[nodiscard]] inline part2_result_t part2(parse_result_t const &parsed,
-                                            std::optional<part1_result_t> part1_answer = std::nullopt) const noexcept {
+  [[nodiscard]] inline part2_result_t
+  part2(parse_result_t const &parsed, std::optional<part1_result_t> const &part1_answer = std::nullopt) const noexcept {
     return solve<true>(parsed, part1_answer);
   }
 
 private:
   template <bool Part2>
   [[nodiscard]] std::conditional_t<Part2, part2_result_t, part1_result_t>
-  solve(parse_result_t const &parsed, [[maybe_unused]] std::optional<part1_result_t> part1_answer) const noexcept;
+  solve(parse_result_t const &parsed,
+        [[maybe_unused]] std::optional<part1_result_t> const &part1_answer) const noexcept;
 };
 
 //! Macro for generating function signature for parse
@@ -50,7 +51,7 @@ private:
   template <> /* Function template specialization */                                                                   \
   template <>                                                                                                          \
   [[nodiscard]] typename DAY::part1_result_t DAY::solve<false>(typename DAY::parse_result_t const &ParamParseResult,   \
-                                                               std::optional<typename DAY::part1_result_t>)            \
+                                                               std::optional<typename DAY::part1_result_t> const &)    \
       const noexcept
 
 //! Macro for generating function signature for a part2 solution
@@ -60,7 +61,7 @@ private:
   template <>                                                                                                          \
   [[nodiscard]] typename DAY::part2_result_t DAY::solve<true>(                                                         \
       typename DAY::parse_result_t const &ParamParseResult,                                                            \
-      [[maybe_unused]] std::optional<typename DAY::part1_result_t> ParamPart1Answer) const noexcept
+      [[maybe_unused]] std::optional<typename DAY::part1_result_t> const &ParamPart1Answer) const noexcept
 
 //! Macro for generating function signature for generic solve.
 /*! \note Must later call INSTANTIATE() in the same TU for codegen
@@ -71,14 +72,14 @@ private:
   template <bool TParamPart2>                                                                                          \
   [[nodiscard]] std::conditional_t<TParamPart2, typename DAY::part2_result_t, typename DAY::part1_result_t>            \
   DAY::solve(typename DAY::parse_result_t const &ParamParseResult,                                                     \
-             [[maybe_unused]] std::optional<typename DAY::part1_result_t> ParamPart1Answer) const noexcept
+             [[maybe_unused]] std::optional<typename DAY::part1_result_t> const &ParamPart1Answer) const noexcept
 
 //! Explicitly instatiate templated SOLVE_IMPL implementation
 #define INSTANTIATE(DAY)                                                                                               \
-  template typename DAY::part1_result_t DAY::solve<false>(parse_result_t const &, std::optional<part1_result_t>)       \
-      const noexcept;                                                                                                  \
-  template typename DAY::part2_result_t DAY::solve<true>(parse_result_t const &, std::optional<part1_result_t>)        \
-      const noexcept
+  template typename DAY::part1_result_t DAY::solve<false>(parse_result_t const &,                                      \
+                                                          std::optional<part1_result_t> const &) const noexcept;       \
+  template typename DAY::part2_result_t DAY::solve<true>(parse_result_t const &,                                       \
+                                                         std::optional<part1_result_t> const &) const noexcept
 
 #define DOCTEST_CONFIG_SUPER_FAST_ASSERTS
 
@@ -91,11 +92,7 @@ private:
     auto const view = day.parse_input(Input);                                                                          \
     auto const part1_actual = day.part1(view);                                                                         \
     auto const part2_actual = day.part2(view, part1_actual);                                                           \
-    SUBCASE("Part 1") {                                                                                                \
-      CHECK_EQ(part1_actual, Part1Answer);                                                                             \
-    }                                                                                                                  \
-    SUBCASE("Part 2") {                                                                                                \
-      CHECK_EQ(part2_actual, Part2Answer);                                                                             \
-    }                                                                                                                  \
+    SUBCASE("Part 1") { CHECK_EQ(part1_actual, Part1Answer); }                                                         \
+    SUBCASE("Part 2") { CHECK_EQ(part2_actual, Part2Answer); }                                                         \
   }
 #endif

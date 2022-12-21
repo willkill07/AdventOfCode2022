@@ -122,7 +122,9 @@ structure::List() noexcept {
   // copy list elements to list location in "heap"
   std::move(std::begin(elems), std::begin(elems) + count, std::begin(heap) + brk);
   // return location of list
-  return handle(-std::exchange(brk, brk + static_cast<type>(count)));
+  i16 const result{static_cast<i16>(-brk)};
+  brk = static_cast<type>(brk + static_cast<type>(count));
+  return result;
 }
 
 // Elem := List | [0-9][0-9]?
@@ -132,9 +134,9 @@ structure::Elem() noexcept {
   if (*ptr == '[') {
     // list
     return List();
-  } else if (type const val(*ptr++ - '0'); *ptr >= '0' and *ptr <= '9') {
+  } else if (type const val(static_cast<type>(*ptr++ - '0')); *ptr >= '0' and *ptr <= '9') {
     // two digit number
-    return handle(static_cast<type>((val * 10) + (*ptr++ - '0')));
+    return {static_cast<type>((val * 10) + (*ptr++ - '0'))};
   } else {
     // single digit
     return handle{val};
@@ -163,8 +165,8 @@ SOLVE_IMPL(Day13, Part2, data, part1_answer) {
   std::span const all{data.trials()};
 
   if constexpr (Part2) {
-    i64 const two = 1l + std::count_if(std::begin(all), std::end(all), cmp<2>);
-    i64 const six = 2l + std::count_if(std::begin(all), std::end(all), cmp<6>);
+    i64 const two = 1L + std::count_if(std::begin(all), std::end(all), cmp<2>);
+    i64 const six = 2L + std::count_if(std::begin(all), std::end(all), cmp<6>);
     return two * six;
   } else {
     i64 result{0}, trial{1};

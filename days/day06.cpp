@@ -32,5 +32,5 @@ INSTANTIATE_TEST(Day06,
                  R"(
 mjqjpqmgbljsphdztnvjfqwrcgsmlb
 )"sv.substr(1),
-                 7l,
-                 19l)
+                 7L,
+                 19L)

@@ -10,7 +10,7 @@ PARSE_IMPL(Day07, view) {
   owning_span<u32, day07::MAX_DIRS> sizes;
   owning_span<u32, day07::MAX_DEPTH> dir_stack;
 
-  for (u64 off{0}; off < std::size(view);) {
+  for (usize off{0}; off < std::size(view);) {
     if ('0' <= view[off] and view[off] <= '9') {
       u32 size;
       off += parse<"\0 ">(view.substr(off), size);
@@ -26,7 +26,7 @@ PARSE_IMPL(Day07, view) {
         dir_stack.push(0u);
       }
     }
-    off += view.substr(off).find_first_of('\n') + 1lu;
+    off += view.substr(off).find_first_of('\n') + 1LU;
   }
   sizes.push(std::rbegin(dir_stack), std::rend(dir_stack));
   return sizes;
@@ -45,7 +45,7 @@ PART2_IMPL(Day07, sizes, part1_answer) {
   u32 const used_space{sizes.top()};
   u32 const available_space{total_space - used_space};
   u32 const need_to_free{needed_free_space - available_space};
-  return std::accumulate(std::begin(sizes), std::end(sizes), -1u, [need_to_free](u32 best_fit, u32 s) {
+  return std::accumulate(std::begin(sizes), std::end(sizes), 0xFFFFFFFFU, [need_to_free](u32 best_fit, u32 s) {
     return ((s >= need_to_free && s < best_fit) ? s : best_fit);
   });
 }

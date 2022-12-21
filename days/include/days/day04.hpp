@@ -8,7 +8,7 @@ constexpr u32 const MAX_RANGES{1000};
 struct interval {
   u32 lo, hi;
 
-  [[gnu::always_inline]] inline bool encloses(interval const &other) const noexcept {
+  [[gnu::always_inline]] [[nodiscard]] inline bool encloses(interval const &other) const noexcept {
     return lo >= other.lo and hi <= other.hi;
   }
 };
@@ -16,11 +16,11 @@ struct interval {
 struct range {
   interval a, b;
 
-  [[gnu::always_inline]] inline bool encloses() const noexcept {
+  [[gnu::always_inline]] [[nodiscard]] inline bool encloses() const noexcept {
     return a.encloses(b) or b.encloses(a);
   }
 
-  [[gnu::always_inline]] inline bool overlaps() const noexcept {
+  [[gnu::always_inline]] [[nodiscard]] inline bool overlaps() const noexcept {
     return (b.lo <= a.hi and a.lo <= b.hi);
   }
 };

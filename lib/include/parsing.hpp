@@ -53,7 +53,7 @@ parse(std::string_view s) noexcept {
 
 template <std::signed_integral T>
 [[gnu::always_inline, gnu::flatten, nodiscard]] inline T
-parse(std::string_view s) noexcept requires (not std::same_as<T, char>) {
+parse(std::string_view s) noexcept requires(not std::same_as<T, char>) {
   if (s.empty()) {
     return {};
   } else {

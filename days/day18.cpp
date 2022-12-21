@@ -67,8 +67,9 @@ PART1_IMPL(Day18, grid) {
 
 PART2_IMPL(Day18, grid, part1_answer) {
   using day18::MAX_DIM;
-  owning_span<bool, MAX_DIM * MAX_DIM * MAX_DIM> seen(MAX_DIM * MAX_DIM * MAX_DIM, false);
-  owning_span<u32, MAX_DIM * MAX_DIM * MAX_DIM> frontier;
+  constexpr u32 Cubed{MAX_DIM * MAX_DIM * MAX_DIM};
+  owning_span<bool, Cubed> seen(Cubed, false);
+  owning_span<u32, Cubed> frontier;
   auto front = std::cbegin(frontier);
   auto back = std::begin(frontier);
   constexpr i32 const limit{static_cast<i32>(MAX_DIM) - 1};
@@ -84,15 +85,16 @@ PART2_IMPL(Day18, grid, part1_answer) {
       bool const xbounds{dx == 0 or (dx < 0 and x > 0) or (dx > 0 and x < limit)};
       bool const ybounds{dy == 0 or (dy < 0 and y > 0) or (dy > 0 and y < limit)};
       bool const zbounds{dz == 0 or (dz < 0 and z > 0) or (dz > 0 and z < limit)};
-      u32 const idx{index(x + dx, y + dy, z + dz)};
-      if (xbounds and ybounds and zbounds and not seen[idx]) {
-        if (not grid[idx]) {
-          // neighbor is an air voxel -- visit
-          *back++ = pack(x + dx, y + dy, z + dz);
-          seen[idx] = true;
-        } else {
-          // neighbor is lava! increment the face count in that direction
-          ++face;
+      if (xbounds and ybounds and zbounds) {
+        if (u32 const idx{index(x + dx, y + dy, z + dz)}; not seen[idx]) {
+          if (not grid[idx]) {
+            // neighbor is an air voxel -- visit
+            *back++ = pack(x + dx, y + dy, z + dz);
+            seen[idx] = true;
+          } else {
+            // neighbor is lava! increment the face count in that direction
+            ++face;
+          }
         }
       }
     }

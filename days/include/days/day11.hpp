@@ -98,16 +98,16 @@ class monkey {
 public:
   constexpr monkey() noexcept = default;
 
-  constexpr inline monkey(items_type &&items, operation const &op, u8 div, u8 throw_if_true, u8 throw_if_false)
+  constexpr inline monkey(items_type const& items, operation const &op, u8 div, u8 throw_if_true, u8 throw_if_false)
 
-      : m_items{std::move(items)},
+      : m_items{items},
         m_op{op},
         div_amount{div},
         if_true{throw_if_true},
         if_false{throw_if_false} {
   }
 
-  constexpr inline std::span<u32 const> items() const noexcept {
+  [[nodiscard]] constexpr inline std::span<u32 const> items() const noexcept {
     return m_items;
   }
 

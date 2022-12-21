@@ -10,7 +10,7 @@
 
 template <size_t N>
 struct fixed_string {
-  char raw_data[N - 1];
+  std::array<char, N - 1> raw_data;
 
   using value_type = char;
   using reference = char &;
@@ -22,7 +22,7 @@ struct fixed_string {
   using difference_type = std::ptrdiff_t;
 
   inline constexpr fixed_string(const char (&str)[N]) noexcept {
-    std::copy_n(str, N - 1, raw_data);
+    std::copy_n(std::begin(str), N - 1, std::begin(raw_data));
   }
 
   inline constexpr value_type operator[](std::size_t index) const noexcept {
@@ -33,35 +33,35 @@ struct fixed_string {
     return raw_data[index];
   }
 
-  inline constexpr std::size_t size() const noexcept {
+  [[nodiscard]] inline constexpr std::size_t size() const noexcept {
     return N - 1;
   }
 
-  inline constexpr const_iterator begin() const noexcept {
-    return raw_data;
+  [[nodiscard]] inline constexpr const_iterator begin() const noexcept {
+    return std::begin(raw_data);
   }
 
-  inline constexpr const_iterator cbegin() const noexcept {
-    return raw_data;
+  [[nodiscard]] inline constexpr const_iterator cbegin() const noexcept {
+    return std::begin(raw_data);
   }
 
   inline constexpr iterator begin() noexcept {
-    return raw_data;
+    return std::begin(raw_data);
   }
 
-  inline constexpr const_pointer data() const noexcept {
-    return raw_data;
+  [[nodiscard]] inline constexpr const_pointer data() const noexcept {
+    return std::data(raw_data);
   }
 
   inline constexpr pointer data() noexcept {
-    return raw_data;
+    return std::data(raw_data);
   }
 
-  inline constexpr const_iterator end() const noexcept {
+  [[nodiscard]] inline constexpr const_iterator end() const noexcept {
     return begin() + size();
   }
 
-  inline constexpr const_iterator cend() const noexcept {
+  [[nodiscard]] inline constexpr const_iterator cend() const noexcept {
     return begin() + size();
   }
 
@@ -69,13 +69,13 @@ struct fixed_string {
     return begin() + size();
   }
 
-  inline constexpr bool check(std::size_t idx) const noexcept {
+  [[nodiscard]] inline constexpr bool check(std::size_t idx) const noexcept {
     return idx < size();
   }
 };
 
 std::size_t constexpr u8_charpoint_size(char point) noexcept {
-  if (unsigned char const lb = static_cast<unsigned char>(point); (lb & 0x80) == 0) { // ascii
+  if (auto const lb = static_cast<unsigned char>(point); (lb & 0x80) == 0) { // ascii
     return 1;
   } else if ((lb & 0xE0) == 0xC0) { // 110x xxxx
     return 2;
@@ -131,7 +131,7 @@ struct fixed_u8string {
       return *this;
     }
 
-    inline constexpr iterator operator++(int) noexcept {
+    inline constexpr const iterator operator++(int) noexcept {
       return iterator{index++};
     }
 
@@ -140,18 +140,18 @@ struct fixed_u8string {
       return *this;
     }
 
-    inline constexpr iterator operator--(int) noexcept {
+    inline constexpr const iterator operator--(int) noexcept {
       return iterator{index--};
     }
 
     inline constexpr iterator &operator+=(difference d) noexcept {
       index += d;
-      return &this;
+      return *this;
     }
 
     inline constexpr iterator &operator-=(difference d) noexcept {
       index -= d;
-      return &this;
+      return *this;
     }
 
     inline friend constexpr iterator operator+(iterator i, difference d) noexcept {
@@ -175,7 +175,7 @@ struct fixed_u8string {
     return *iterator{index};
   }
 
-  inline constexpr std::size_t size() const noexcept {
+  [[nodiscard]] inline constexpr std::size_t size() const noexcept {
     return length;
   }
 

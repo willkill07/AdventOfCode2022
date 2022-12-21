@@ -34,13 +34,13 @@ PARSE_IMPL(Day05, view) {
     // line is of form:   '    [A]     [B] ...'
     // offsets of values:   1   5   9   13 ...   (4s + 1)
     for (u32 idx{0}; auto &s : state.stacks) {
-      if (char const c{view[off + 4 * idx + 1]}; c != ' ') {
+      if (char const c{view[off + (idx << 2) + 1]}; c != ' ') {
         s.push(c);
       }
       ++idx;
     }
     // advance line
-    off += num_stacks * 4;
+    off += num_stacks << 2;
   }
 
   // reverse all stacks since we parsed top->bottom

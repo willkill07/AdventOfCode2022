@@ -9,7 +9,7 @@ PARSE_IMPL(Day12, view) {
   grid.push(std::begin(view), std::end(view));
   grid[start] = 'a';
   grid[stop] = 'z';
-  return {std::move(grid), start, stop, width, height};
+  return {grid, start, stop, width, height};
 }
 
 namespace {
@@ -81,8 +81,10 @@ SOLVE_IMPL(Day12, Part2, data, part1_answer) {
       enqueue(queued, grid, back, curr, next, dist);
     }
     // up -- check detects overflow
-    if (u32 const next{curr - width}; next < curr) {
-      enqueue(queued, grid, back, curr, next, dist);
+    if (curr > width) {
+      if (u32 const next{curr - width}; next < curr) {
+        enqueue(queued, grid, back, curr, next, dist);
+      }
     }
     // down -- checks boundary/size
     if (u32 const next{curr + width}; next < std::size(grid)) {

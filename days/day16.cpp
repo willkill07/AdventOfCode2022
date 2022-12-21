@@ -85,13 +85,13 @@ PARSE_IMPL(Day16, view) {
   }
   connected.push(dist[static_cast<u32>(day16::MAX_VALVES * AA + AA)]);
 
-  return {std::move(flow_amount), std::move(connected)};
+  return {flow_amount, connected};
 }
 
 constexpr u32 const MAXN{day16::MAX_WORKING_VALVES};
 
 void
-visit(i32 (&dp)[1 << MAXN],
+visit(std::array<i32, 1 << MAXN> &dp,
       day16::compact_vector_t const &rates,
       day16::compact_matrix_t const &dist,
       u32 curr,
@@ -118,7 +118,7 @@ visit(i32 (&dp)[1 << MAXN],
 }
 
 SOLVE_IMPL(Day16, Part2, data, unused_part1) {
-  i32 dp[1 << MAXN];
+  std::array<i32, 1 << MAXN> dp;
   std::fill_n(std::addressof(dp[0]), sizeof(dp) / sizeof(dp[0]), 0);
 
   u32 const start{std::size(data.flow) - 1};

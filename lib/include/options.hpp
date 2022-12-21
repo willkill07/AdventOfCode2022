@@ -19,7 +19,7 @@ struct run_options {
   std::optional<u32> graph_width{std::nullopt};
   std::optional<u32> single{std::nullopt};
   std::optional<u32> benchmark{std::nullopt};
-  
+
   bool timing{true};
   bool part2{true};
   bool part1{true};
@@ -28,7 +28,6 @@ struct run_options {
   bool colorize{true};
   bool graphs{false};
   bool visual{false};
-
 
   [[nodiscard]] inline std::string format(std::integral auto value) const noexcept {
     return fmt::format("{0}", value);

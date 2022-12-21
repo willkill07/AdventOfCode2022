@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <functional>
 #include <string_view>
 
@@ -20,7 +21,7 @@ static constexpr auto const faint_green{fmt::fg(fmt::terminal_color::green) | fm
 inline bool const is_a_tty{static_cast<bool>(usize(STDOUT_FILENO))};
 
 fmt::text_style
-style(fmt::text_style s, bool flag) noexcept {
+style(fmt::text_style s, bool flag) {
   fmt::text_style style;
   if (is_a_tty and flag) {
     return s;
@@ -29,10 +30,8 @@ style(fmt::text_style s, bool flag) noexcept {
 }
 
 void
-print_header(std::string title, unsigned width, run_options const &options) noexcept {
-  auto const s = style(fmt::emphasis::italic | fmt::emphasis::bold, options.colorize);
-  auto const header = fmt::styled(title, s);
-  fmt::print("\n{0:<6} {1:^{2}}\n", "", header, width + 2);
+print_header(std::string const &title, unsigned width) noexcept {
+  fmt::print("\n{0:<6} {1:^{2}}\n", "", title, width + 2);
   fmt::print("{0:<6} ╭{0:─^{1}}╮\n", "", width + 2);
 }
 
@@ -42,7 +41,7 @@ print_footer(unsigned width) noexcept {
 }
 
 void
-print_single(std::string header,
+print_single(std::string const &header,
              unsigned width,
              run_options const &options,
              std::vector<timing_data> const &timing,
@@ -55,7 +54,7 @@ print_single(std::string header,
     calc.add_sample(value_getter(t));
   }
 
-  print_header(header, width, options);
+  print_header(header, width);
   for (unsigned idx{0}; idx < std::size(timing); ++idx) {
     auto const &curr = timing[idx];
     std::string row = chart::row(calc.length_for(value_getter(curr), width));
@@ -80,7 +79,7 @@ graph_output(run_options const &options,
   u32 const width{options.graph_width.value_or(run_options::default_graph_width)};
 
   fmt::print("\n");
-  print_header("Overall Statistics"s, width, options);
+  print_header("Overall Statistics"s, width);
   for (unsigned idx{0}; idx < std::size(timing); ++idx) {
     auto const &curr_time = timing[idx];
     auto const &curr_entry = entries[idx];

@@ -35,9 +35,9 @@ constexpr std::array const content_colors{colors::yellow,
 constexpr std::array const summary_colors{
     colors::header_plain, colors::cyan, colors::red, colors::green, colors::yellow};
 
-constexpr std::array const group_grouping{1lu, 2lu, 4lu};
-constexpr std::array const content_grouping{1lu, 1lu, 1lu, 1lu, 1lu, 1lu, 1lu};
-constexpr std::array const summary_grouping{3lu, 1lu, 1lu, 1lu, 1lu};
+constexpr std::array const group_grouping{1LU, 2LU, 4LU};
+constexpr std::array const content_grouping{1LU, 1LU, 1LU, 1LU, 1LU, 1LU, 1LU};
+constexpr std::array const summary_grouping{3LU, 1LU, 1LU, 1LU, 1LU};
 
 #include <fmt/ranges.h>
 

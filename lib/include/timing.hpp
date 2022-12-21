@@ -15,7 +15,7 @@ struct timing_data {
   double part1{0.0};
   double part2{0.0};
 
-  inline double total() const noexcept {
+  [[nodiscard]] inline double total() const noexcept {
     return parsing + part1 + part2;
   }
 

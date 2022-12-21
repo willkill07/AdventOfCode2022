@@ -1,0 +1,7 @@
+---
+Checks:          'clang-diagnostic-*,clang-analyzer-*,-*,bugprone-*,-bugprone-easily-swappable-parameters,-bugprone-macro-parentheses,cert-*,clang-analyzer-*,modernize-*,-modernize-use-trailing-return-type,performance-*'
+WarningsAsErrors: ''
+HeaderFilterRegex: '\\.hpp$'
+AnalyzeTemporaryDtors: true
+FormatStyle:     file
+---

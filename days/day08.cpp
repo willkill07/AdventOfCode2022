@@ -10,7 +10,7 @@ PARSE_IMPL(Day08, view) {
 
   typename day08::grid_t grid(dim);
   for (u32 row{0}; row < dim; ++row) {
-    grid[row] = view.substr(row * (dim + 1), dim);
+    grid[row] = view.substr(static_cast<u32>(row * (dim + 1)), dim);
   }
 
   typename day08::visible_t visible(dim * dim, 0u);
@@ -103,5 +103,5 @@ INSTANTIATE_TEST(Day08,
 33549
 35390
 )"sv.substr(1),
-                 21l,
-                 8l)
+                 21L,
+                 8L)

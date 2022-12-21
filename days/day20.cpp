@@ -11,6 +11,7 @@ namespace {
 template <typename T>
 constexpr inline T
 fast_mod(T val, unsigned N) {
+  __builtin_assume(N > 0);
   if (N == 5000) {
     return val % 5000u;
   } else if (N == 4999) {
@@ -81,7 +82,7 @@ run(day20::list_type<i64> const &val, unsigned zero_index) noexcept {
 
 PARSE_IMPL(Day20, view) {
   typename day20::list_type<i64> numbers;
-  u32 zero_index;
+  u32 zero_index{0xFFFFFFFFU};
   u32 idx{0};
   for (usize off{0}; off < std::size(view);) {
     i32 val;
@@ -104,7 +105,7 @@ SOLVE_IMPL(Day20, Part2, state, part1_answer) {
   } else {
     owning_span<i64, day20::MAXN> numbers(std::size(nums));
     std::transform(std::begin(nums), std::end(nums), std::begin(numbers), [](i32 val) {
-      return 811'589'153l * val;
+      return 811'589'153L * val;
     });
     return run<10>(numbers, zero_index);
   }
@@ -122,5 +123,5 @@ INSTANTIATE_TEST(Day20,
 0
 4
 )"sv.substr(1),
-                 3l,
-                 1623178306l)
+                 3L,
+                 1623178306L)

@@ -7,7 +7,7 @@ namespace day08 {
 
 constexpr u32 const GRID_SIZE{99};
 
-using visible_t = owning_span<u32, GRID_SIZE * GRID_SIZE>;
+using visible_t = owning_span<u32, static_cast<u32>(GRID_SIZE * GRID_SIZE)>;
 using grid_t = owning_span<std::string_view, GRID_SIZE>;
 
 struct result {

@@ -10,7 +10,7 @@ namespace day20 {
 
   struct result {
     list_type<i64> numbers;
-    unsigned zero_index;
+    unsigned zero_index{0};
   };
 }
 

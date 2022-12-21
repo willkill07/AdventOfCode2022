@@ -26,7 +26,7 @@ file_backed_buffer::file_backed_buffer(std::string const &filename) noexcept
 #if __linux__
           mmap_flags |= MAP_LOCKED | MAP_POPULATE;
 #endif
-          void *addr = mmap(NULL, len, PROT_READ, mmap_flags, fd, 0);
+          void *addr = mmap(nullptr, len, PROT_READ, mmap_flags, fd, 0);
           (void)mlock(addr, len);
           (void)madvise(addr, len, MADV_SEQUENTIAL);
           return reinterpret_cast<char const *>(addr);

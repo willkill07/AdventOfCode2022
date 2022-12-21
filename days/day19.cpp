@@ -74,7 +74,7 @@ PARSE_IMPL(Day19, view) {
                        curr[Obsidian][Clay],
                        curr[Geode][Ore],
                        curr[Geode][Obsidian]);
-    result.push(std::move(curr));
+    result.push(curr);
   }
   return result;
 }
@@ -134,7 +134,7 @@ SOLVE_IMPL(Day19, Part2, blueprints, part1_answer) {
         std::cref(blueprints[i]),
         std::ref(scores[i])));
   }
-  for (auto& t : threads) {
+  for (auto &t : threads) {
     t.join();
   }
 

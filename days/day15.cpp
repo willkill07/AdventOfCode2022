@@ -29,7 +29,7 @@ PARSE_IMPL(Day15, view) {
 
 PART1_IMPL(Day15, data) {
   i32 const target_row = (data.size() <= 15 ? 10 : 2'000'000);
-  owning_span<mark, day15::MAX_ENTRIES * 2> marks;
+  owning_span<mark, static_cast<u32>(day15::MAX_ENTRIES * 2U)> marks;
   for (auto &&[s, b] : data) {
     i32 const units_away{s.manhattan(b) - std::abs(target_row - s.y)};
     if (units_away >= 0) {
@@ -121,7 +121,7 @@ PART2_IMPL(Day15, data, part1_answer) {
           candidate = candidate and (s.manhattan(v) > s.manhattan(b));
         }
         if (candidate) {
-          return (4'000'000l * v.x) + v.y;
+          return (4'000'000L * v.x) + v.y;
         }
       }
     }

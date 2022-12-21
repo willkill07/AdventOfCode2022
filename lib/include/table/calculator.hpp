@@ -21,12 +21,12 @@ class width_calculator {
       sum += width;
     }
 
-    inline usize get_adjustment(usize growth_amount, usize id) const noexcept {
+    [[nodiscard]] inline usize get_adjustment(usize growth_amount, usize id) const noexcept {
       return (growth_amount * (id + 1) / count) - (growth_amount * id / count);
     }
 
-    inline usize real_width() const noexcept {
-      return (count == 0) ? 0lu : (count - 1) * 3 + sum;
+    [[nodiscard]] inline usize real_width() const noexcept {
+      return (count == 0) ? 0LU : (count - 1) * 3 + sum;
     }
   };
 

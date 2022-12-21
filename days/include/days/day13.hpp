@@ -32,8 +32,8 @@ struct handle {
   constexpr inline bool operator==(handle const &) const noexcept = default;
   constexpr inline bool operator!=(handle const &) const noexcept = default;
 
-  constexpr inline type get_value() const noexcept;
-  constexpr inline std::span<handle const> get_list() const noexcept;
+  [[nodiscard]] constexpr inline type get_value() const noexcept;
+  [[nodiscard]] constexpr inline std::span<handle const> get_list() const noexcept;
 
   type value{std::numeric_limits<type>::min()};
 
@@ -49,8 +49,8 @@ static constexpr u32 MAX_ELEMS{300};
 struct structure {
 
   constexpr inline structure(std::string_view buffer) noexcept;
-  constexpr inline std::span<handle const> trials() const noexcept;
-  constexpr inline handle const *data() const noexcept;
+  [[nodiscard]] constexpr inline std::span<handle const> trials() const noexcept;
+  [[nodiscard]] constexpr inline handle const *data() const noexcept;
 
 private:
   // parse functions

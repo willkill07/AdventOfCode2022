@@ -8,9 +8,9 @@ namespace {
 
 [[gnu::always_inline, nodiscard]] inline u64
 hash(std::string_view s) noexcept {
-  return std::accumulate(std::begin(s), std::end(s), 0lu, [](u64 hash, char c) noexcept {
+  return std::accumulate(std::begin(s), std::end(s), 0LU, [](u64 hash, char c) noexcept {
     auto const offset = static_cast<u32>(c - (c >= 'a' ? 'a' : 'A' - 26));
-    return hash | (1lu << offset);
+    return hash | (1LU << offset);
   });
 }
 
@@ -38,13 +38,13 @@ PART1_IMPL(Day03, lines) {
 PART2_IMPL(Day03, lines, part1_answer) {
   int answer{0};
   int count{0};
-  u64 set{-1lu};
+  u64 set{0xFFFFFFFFFFFFFFFFLU};
   for (auto line : lines) {
     set &= hash(line);
     if (++count == 3) {
       answer += std::countr_zero(set) + 1;
       count = 0;
-      set = -1lu;
+      set = 0xFFFFFFFFFFFFFFFFLU;
     }
   }
   return answer;

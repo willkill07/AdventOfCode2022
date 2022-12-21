@@ -28,7 +28,7 @@ public:
 
   length_result<Parts> length_for(T value, unsigned width) {
     unsigned const segments = width * Parts;
-    unsigned const percentage = static_cast<unsigned>(segments * (static_cast<double>(value) / static_cast<double>(max_value)));
+    auto const percentage = static_cast<unsigned>(segments * (static_cast<double>(value) / static_cast<double>(max_value)));
     unsigned const whole = percentage / Parts;
     unsigned const partial = 1 + percentage % Parts;
     if (whole == width) {

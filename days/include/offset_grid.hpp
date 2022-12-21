@@ -66,7 +66,7 @@ struct offset_grid {
     return m_data.cend();
   }
 
-  constexpr inline usize size() const noexcept {
+  [[nodiscard]] constexpr inline usize size() const noexcept {
     return m_data.size();
   }
 
@@ -78,31 +78,31 @@ struct offset_grid {
     return m_data.data();
   }
 
-  constexpr inline i32 xmin() const noexcept {
+  [[nodiscard]] constexpr inline i32 xmin() const noexcept {
     return m_xmin;
   }
 
-  constexpr inline i32 xmax() const noexcept {
+  [[nodiscard]] constexpr inline i32 xmax() const noexcept {
     return m_xmin + m_width - 1;
   }
 
-  constexpr inline i32 ymin() const noexcept {
+  [[nodiscard]] constexpr inline i32 ymin() const noexcept {
     return m_ymin;
   }
 
-  constexpr inline i32 ymax() const noexcept {
+  [[nodiscard]] constexpr inline i32 ymax() const noexcept {
     return m_ymin + m_height - 1;
   }
 
-  constexpr inline u32 width() const noexcept {
+  [[nodiscard]] constexpr inline u32 width() const noexcept {
     return static_cast<u32>(m_width);
   }
 
-  constexpr inline u32 height() const noexcept {
+  [[nodiscard]] constexpr inline u32 height() const noexcept {
     return static_cast<u32>(m_height);
   }
 
-  constexpr inline std::string_view row(u32 row_num) const noexcept requires std::same_as<T, char> {
+  [[nodiscard]] constexpr inline std::string_view row(u32 row_num) const noexcept requires std::same_as<T, char> {
     return std::string_view{data() + row_num * width(), width()};
   }
 

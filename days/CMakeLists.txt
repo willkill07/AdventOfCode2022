@@ -23,8 +23,13 @@ target_sources(days
   day20.cpp
 )
 
-find_package(OpenMP REQUIRED)
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  target_compile_options(days PRIVATE -fsanitize=integer -fsanitize=nullability -fsanitize=implicit-conversion -fsanitize=array-bounds -fsanitize=address -fsanitize-recover=address -fno-omit-frame-pointer)
+  target_link_libraries(days PRIVATE -fsanitize=integer -fsanitize=nullability -fsanitize=implicit-conversion -fsanitize=array-bounds -fsanitize=address -fsanitize-recover=address -fno-omit-frame-pointer)
+  set_target_properties(days PROPERTIES
+    CXX_CLANG_TIDY clang-tidy
+    CXX_CPPCHECK "cppcheck;--force")
+endif()
 
 target_include_directories(days PUBLIC include)
 target_link_libraries(days PRIVATE advent_common lib)
-target_link_libraries(days PUBLIC OpenMP::OpenMP_CXX)
