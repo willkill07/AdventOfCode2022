@@ -21,6 +21,7 @@ target_sources(days
   day18.cpp
   day19.cpp
   day20.cpp
+  day21.cpp
 )
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)

@@ -91,8 +91,8 @@ private:
     Day day;                                                                                                           \
     auto const view = day.parse_input(Input);                                                                          \
     auto const part1_actual = day.part1(view);                                                                         \
+    CHECK_EQ(part1_actual, Part1Answer);                                                                               \
     auto const part2_actual = day.part2(view, part1_actual);                                                           \
-    SUBCASE("Part 1") { CHECK_EQ(part1_actual, Part1Answer); }                                                         \
-    SUBCASE("Part 2") { CHECK_EQ(part2_actual, Part2Answer); }                                                         \
+    CHECK_EQ(part2_actual, Part2Answer);                                                                               \
   }
 #endif
