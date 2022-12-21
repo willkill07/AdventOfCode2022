@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <limits>
+#include <variant>
 
 #include "days/day21.hpp"
 #include "parsing.hpp"
@@ -16,11 +17,11 @@ get_uid(std::string_view s) noexcept {
 }
 
 constexpr inline i64
-evaluate(day21::list_type<day21::parse_type> const &nodes, u32 id) noexcept {
-  if (auto const &node{nodes[id]}; node.type == day21::node_type::value) {
-    return node.underlying.value;
-  } else {
-    auto const &tree_node{node.underlying.tree};
+evaluate(day21::list_type<day21::expr_node> const &nodes, u32 id) noexcept {
+  if (auto const &node{nodes[id]}; std::holds_alternative<day21::value_node>(node)) {
+    return std::get<day21::value_node>(node);
+  } else if (std::holds_alternative<day21::op_node>(node)) {
+    auto const &tree_node{std::get<day21::op_node>(node)};
     i64 const lhs{evaluate(nodes, tree_node.lhs)};
     i64 const rhs{evaluate(nodes, tree_node.rhs)};
     switch (tree_node.op) {
@@ -36,30 +37,31 @@ evaluate(day21::list_type<day21::parse_type> const &nodes, u32 id) noexcept {
       __builtin_unreachable();
     }
   }
+  __builtin_unreachable();
 }
 
 constexpr inline void
-simplify(day21::list_type<day21::parse_type> &nodes, day21::parse_type &node) noexcept {
-  if (node.type == day21::node_type::tree) {
-    auto const &tree{node.underlying.tree};
+simplify(day21::list_type<day21::expr_node> &nodes, day21::expr_node &node) noexcept {
+  if (std::holds_alternative<day21::op_node>(node)) {
+    auto const &tree{std::get<day21::op_node>(node)};
     simplify(nodes, nodes[tree.lhs]);
     simplify(nodes, nodes[tree.rhs]);
-    if (nodes[tree.lhs].type == day21::node_type::value and nodes[tree.rhs].type == day21::node_type::value) {
-      node.type = day21::node_type::value;
-      auto const lhs{nodes[tree.lhs].underlying.value};
-      auto const rhs{nodes[tree.rhs].underlying.value};
+    if (std::holds_alternative<day21::value_node>(nodes[tree.lhs]) and
+        std::holds_alternative<day21::value_node>(nodes[tree.rhs])) {
+      auto const lhs{std::get<day21::value_node>(nodes[tree.lhs])};
+      auto const rhs{std::get<day21::value_node>(nodes[tree.rhs])};
       switch (tree.op) {
       case '+':
-        node.underlying.value = lhs + rhs;
+        node = lhs + rhs;
         break;
       case '-':
-        node.underlying.value = lhs - rhs;
+        node = lhs - rhs;
         break;
       case '/':
-        node.underlying.value = lhs / rhs;
+        node = lhs / rhs;
         break;
       case '*':
-        node.underlying.value = lhs * rhs;
+        node = lhs * rhs;
         break;
       default:
         __builtin_unreachable();
@@ -69,17 +71,18 @@ simplify(day21::list_type<day21::parse_type> &nodes, day21::parse_type &node) no
 }
 
 constexpr inline i64
-symbolic_solve(day21::list_type<day21::parse_type> &numbers, u32 idx) noexcept {
-  auto const lhs_idx{numbers[idx].underlying.tree.lhs};
-  auto const rhs_idx{numbers[idx].underlying.tree.rhs};
-  bool value_on_lhs{numbers[lhs_idx].type == day21::node_type::value};
-  i64 value{numbers[value_on_lhs ? lhs_idx : rhs_idx].underlying.value};
+symbolic_solve(day21::list_type<day21::expr_node> &numbers, u32 idx) noexcept {
+  auto const &tree_node = std::get<day21::op_node>(numbers[idx]);
+  auto const lhs_idx{tree_node.lhs};
+  auto const rhs_idx{tree_node.rhs};
+  bool value_on_lhs{std::holds_alternative<day21::value_node>(numbers[lhs_idx])};
+  i64 value{std::get<day21::value_node>(numbers[value_on_lhs ? lhs_idx : rhs_idx])};
   idx = (value_on_lhs ? rhs_idx : lhs_idx);
 
-  while (numbers[idx].type != day21::node_type::symbol) {
-    auto const tree{numbers[idx].underlying.tree};
-    value_on_lhs = numbers[tree.lhs].type == day21::node_type::value;
-    auto const paired{numbers[value_on_lhs ? tree.lhs : tree.rhs].underlying.value};
+  while (not numbers[idx].valueless_by_exception()) {
+    auto const tree{std::get<day21::op_node>(numbers[idx])};
+    value_on_lhs = std::holds_alternative<day21::value_node>(numbers[tree.lhs]);
+    auto const paired{std::get<day21::value_node>(numbers[value_on_lhs ? tree.lhs : tree.rhs])};
     switch (tree.op) {
     case '+':
       value = value - paired;
@@ -104,7 +107,7 @@ symbolic_solve(day21::list_type<day21::parse_type> &numbers, u32 idx) noexcept {
 } // namespace
 
 PARSE_IMPL(Day21, view) {
-  day21::list_type<day21::parse_type> parsed;
+  day21::list_type<day21::expr_node> parsed;
   day21::list_type<u32> ids;
 
   // parse data -- O(N)
@@ -112,25 +115,25 @@ PARSE_IMPL(Day21, view) {
     std::string_view id;
     off += parse<"\0: ">(view.substr(off), id);
     ids.push(get_uid(id));
-    day21::parse_type rest;
     if ('0' <= view[off] and view[off] <= '9') {
-      rest.type = day21::node_type::value;
-      off += parse<"\0\n">(view.substr(off), rest.underlying.value);
+      i64 value;
+      off += parse<"\0\n">(view.substr(off), value);
+      parsed.push(value);
     } else {
-      rest.type = day21::node_type::tree;
       std::string_view lhs, rhs;
-      off += parse<"\0 \1 \2\n">(view.substr(off), lhs, rest.underlying.tree.op, rhs);
-      rest.underlying.tree.lhs = get_uid(lhs);
-      rest.underlying.tree.rhs = get_uid(rhs);
+      day21::op_node tree_node;
+      off += parse<"\0 \1 \2\n">(view.substr(off), lhs, tree_node.op, rhs);
+      tree_node.lhs = get_uid(lhs);
+      tree_node.rhs = get_uid(rhs);
+      parsed.push(tree_node);
     }
-    parsed.push(rest);
   }
 
   // offsets for "special" nodes
   u32 root_idx{0}, humn_idx{0};
 
   // cleaned data for processing -- O(N)
-  day21::list_type<day21::parse_type> cleaned(std::size(parsed));
+  day21::list_type<day21::expr_node> cleaned(std::size(parsed));
 
   // make temporary lookup table -- O(N lg N)
   {
@@ -169,9 +172,10 @@ PARSE_IMPL(Day21, view) {
 
   // fix references within subexpressions -- O(N lg N)
   for (auto &entry : cleaned) {
-    if (entry.type == day21::node_type::tree) {
-      auto &lhs{entry.underlying.tree.lhs};
-      auto &rhs{entry.underlying.tree.rhs};
+    if (std::holds_alternative<day21::op_node>(entry)) {
+      auto &tree{std::get<day21::op_node>(entry)};
+      auto &lhs{tree.lhs};
+      auto &rhs{tree.rhs};
       // O(lg N) each
       lhs = as<u32>(std::distance(std::begin(ids), std::lower_bound(std::begin(ids), std::end(ids), lhs)));
       rhs = as<u32>(std::distance(std::begin(ids), std::lower_bound(std::begin(ids), std::end(ids), rhs)));
@@ -187,7 +191,7 @@ PART1_IMPL(Day21, data) {
 
 PART2_IMPL(Day21, data, part1_answer) {
   auto numbers{data.numbers};
-  numbers[data.humn].type = day21::node_type::symbol;
+  numbers[data.humn] = day21::expr_node{};
   simplify(numbers, numbers[data.root]);
   return symbolic_solve(numbers, data.root);
 }
