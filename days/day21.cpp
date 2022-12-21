@@ -90,7 +90,7 @@ symbolic_solve(day21::list_type<day21::expr_node> &numbers, u32 idx) noexcept {
   idx = (value_on_lhs ? rhs_idx : lhs_idx);
 
   // while we have not seen the symbol
-  while (not numbers[idx].valueless_by_exception()) {
+  while (not std::holds_alternative<day21::symbol_node>(numbers[idx])) {
     auto const tree{std::get<day21::op_node>(numbers[idx])};
     value_on_lhs = std::holds_alternative<day21::value_node>(numbers[tree.lhs]);
     // grab the paired value with the subexpression
@@ -206,7 +206,7 @@ SOLVE_IMPL(Day21, Part2, data, part1_answer) {
     // make a mutable copy
     auto numbers{data.numbers};
     // set the human to be a default expr_node (symbol)
-    numbers[data.humn] = day21::expr_node{};
+    numbers[data.humn] = day21::symbol_node{};
     // symbolicly solve for "X" from root
     return symbolic_solve(numbers, data.root);
   }

@@ -17,7 +17,9 @@ struct op_node {
 
 using value_node = i64;
 
-using expr_node = std::variant<std::monostate, op_node, value_node>;
+struct symbol_node{};
+
+using expr_node = std::variant<symbol_node, op_node, value_node>;
 
 struct result {
   list_type<expr_node> numbers;
