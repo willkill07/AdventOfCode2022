@@ -11,7 +11,9 @@ namespace {
 template <typename T>
 constexpr inline T
 fast_mod(T val, unsigned N) {
-  __builtin_assume(N > 0);
+  if (N == 0) {
+    __builtin_unreachable();
+  }
   if (N == 5000) {
     return val % 5000u;
   } else if (N == 4999) {
