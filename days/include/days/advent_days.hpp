@@ -24,6 +24,7 @@
 #include "days/day19.hpp"
 #include "days/day20.hpp"
 #include "days/day21.hpp"
+#include "days/day22.hpp"
 
 using all_days = std::tuple<Day01,
                             Day02,
@@ -45,6 +46,7 @@ using all_days = std::tuple<Day01,
                             Day18,
                             Day19,
                             Day20,
-                            Day21>;
+                            Day21,
+                            Day22>;
 
 constexpr inline static usize const implemented_days = std::tuple_size_v<all_days>;
